@@ -71,6 +71,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
 #actScreen{position:fixed;inset:0;z-index:9000;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px}
 #actScreen.show{display:flex}
 .act-card{background:var(--s1);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:0;padding:28px;width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 60px rgba(0,102,255,.15)}
+.login-rol-btn{width:100%;padding:12px;background:var(--s2);border:1px solid var(--border);color:var(--text);font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .15s;text-align:left}
+.login-rol-btn:hover{border-color:var(--accent);background:rgba(0,102,255,.08);color:var(--accent)}
 .act-logo{font-family:'Oswald',sans-serif;font-size:42px;letter-spacing:6px;color:#fff;text-align:center}
 .act-sub{font-size:12px;color:var(--muted);text-align:center;font-family:'Oswald',sans-serif;letter-spacing:1px;text-transform:uppercase}
 .act-field label{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px}
@@ -349,6 +351,24 @@ select.f-input option{background:var(--s2)}
 .carrito-item{display:flex;align-items:center;gap:8px;padding:8px;background:var(--s2);border:1px solid var(--border);margin-bottom:4px}
 .carrito-qty{display:flex;align-items:center;gap:6px}
 .qty-btn{background:var(--s3);border:none;color:var(--text);width:26px;height:26px;font-size:16px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+/* ══ SETUP WIZARD ══ */
+#wizardScreen{position:fixed;inset:0;z-index:9500;background:#000;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+#wizardScreen.show{display:flex}
+.wizard-card{background:var(--s1);border:1px solid var(--border);border-top:3px solid var(--accent);width:100%;max-width:400px;padding:24px;display:flex;flex-direction:column;gap:16px}
+.wizard-step{display:none;flex-direction:column;gap:14px}
+.wizard-step.active{display:flex}
+.wizard-title{font-family:'Oswald',sans-serif;font-size:22px;letter-spacing:2px;text-transform:uppercase;color:var(--text)}
+.wizard-sub{font-size:12px;color:var(--muted);line-height:1.6;margin-top:-8px}
+.wizard-progress{display:flex;gap:6px;margin-bottom:4px}
+.wizard-dot{flex:1;height:3px;background:var(--border);transition:background .3s}
+.wizard-dot.done{background:var(--accent)}
+.wizard-nav{display:flex;gap:8px;margin-top:4px}
+.logo-upload-wizard{width:80px;height:80px;background:var(--s2);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;margin:0 auto;font-size:36px;transition:border .2s}
+.logo-upload-wizard:hover{border-color:var(--accent)}
+.color-preset-wiz{width:32px;height:32px;cursor:pointer;border:2px solid transparent;transition:all .15s;flex-shrink:0}
+.color-preset-wiz:hover{transform:scale(1.15);border-color:#fff}
+.color-preset-wiz.selected{border-color:#fff;box-shadow:0 0 0 2px var(--accent)}
 </style>
 <!-- Configuración SiryX — no modificar -->
 <script src="config.js" onerror="console.warn('config.js no encontrado')"></script>
@@ -356,6 +376,129 @@ select.f-input option{background:var(--s2)}
 <body>
 
 <!-- SPLASH -->
+
+<!-- SETUP WIZARD — Primera vez -->
+<div id="wizardScreen">
+  <div class="wizard-card">
+
+    <!-- PROGRESS DOTS -->
+    <div class="wizard-progress">
+      <div class="wizard-dot done" id="wdot1"></div>
+      <div class="wizard-dot" id="wdot2"></div>
+      <div class="wizard-dot" id="wdot3"></div>
+      <div class="wizard-dot" id="wdot4"></div>
+    </div>
+
+    <!-- PASO 1: BIENVENIDA + NOMBRE -->
+    <div class="wizard-step active" id="wstep1">
+      <div style="text-align:center;font-size:48px">🏋️</div>
+      <div class="wizard-title" style="text-align:center">¡Bienvenido a SiryX Gym!</div>
+      <div class="wizard-sub" style="text-align:center">Vamos a configurar tu gym en 4 pasos rápidos. Solo toma 2 minutos.</div>
+      <div class="f-field"><label>Nombre de tu gym</label>
+        <input class="f-input" id="wNombre" placeholder="Ej: Olympo Gym" style="font-size:15px;font-family:'Oswald',sans-serif;letter-spacing:1px">
+      </div>
+      <div class="f-field"><label>Eslogan (opcional)</label>
+        <input class="f-input" id="wEslogan" placeholder="Ej: Forja tu mejor versión">
+      </div>
+      <div class="wizard-nav">
+        <button class="btn btn-lime" onclick="wizardNext(1)" style="flex:1;justify-content:center">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- PASO 2: LOGO Y COLOR -->
+    <div class="wizard-step" id="wstep2">
+      <div class="wizard-title">Logo y color</div>
+      <div class="wizard-sub">Personaliza la identidad visual de tu gym.</div>
+
+      <div>
+        <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-family:'Oswald',sans-serif">Logo del gym</label>
+        <div style="display:flex;align-items:center;gap:14px;margin-top:8px">
+          <div class="logo-upload-wizard" id="wLogoWrap" onclick="document.getElementById('wLogoFile').click()">
+            <span id="wLogoEmoji">💪</span>
+            <img id="wLogoImg" style="display:none;width:100%;height:100%;object-fit:cover">
+          </div>
+          <input type="file" id="wLogoFile" accept="image/*" style="display:none" onchange="wHandleLogo(event)">
+          <div style="font-size:11px;color:var(--muted);line-height:1.7">Toca el cuadro para<br>subir tu logo.<br>Si no tienes, lo omites.</div>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-family:'Oswald',sans-serif">Color principal</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <div class="color-preset-wiz selected" data-color="#0066FF" style="background:#0066FF" onclick="wSelColor('#0066FF',this)"></div>
+          <div class="color-preset-wiz" data-color="#E8000D" style="background:#E8000D" onclick="wSelColor('#E8000D',this)"></div>
+          <div class="color-preset-wiz" data-color="#FF6600" style="background:#FF6600" onclick="wSelColor('#FF6600',this)"></div>
+          <div class="color-preset-wiz" data-color="#7B2FBE" style="background:#7B2FBE" onclick="wSelColor('#7B2FBE',this)"></div>
+          <div class="color-preset-wiz" data-color="#00AA44" style="background:#00AA44" onclick="wSelColor('#00AA44',this)"></div>
+          <div class="color-preset-wiz" data-color="#FFB300" style="background:#FFB300" onclick="wSelColor('#FFB300',this)"></div>
+          <div class="color-preset-wiz" data-color="#00BBCC" style="background:#00BBCC" onclick="wSelColor('#00BBCC',this)"></div>
+          <div class="color-preset-wiz" data-color="#FF1493" style="background:#FF1493" onclick="wSelColor('#FF1493',this)"></div>
+          <input type="color" id="wColorCustom" value="#0066FF" oninput="wSelColor(this.value,null)" style="width:32px;height:32px;border:none;cursor:pointer;background:none;padding:0">
+        </div>
+      </div>
+
+      <div class="wizard-nav">
+        <button class="btn btn-outline" onclick="wizardBack(2)" style="flex:1;justify-content:center;clip-path:none">← Atrás</button>
+        <button class="btn btn-lime" onclick="wizardNext(2)" style="flex:2;justify-content:center">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- PASO 3: CLAVES DE ACCESO -->
+    <div class="wizard-step" id="wstep3">
+      <div class="wizard-title">🔐 Claves de acceso</div>
+      <div class="wizard-sub">Define las contraseñas para cada rol. <b>Guárdalas bien</b> — no hay forma de recuperarlas si las olvidas.</div>
+
+      <div class="f-field">
+        <label>Tu clave de Administrador</label>
+        <input class="f-input" id="wClaveAdmin" type="password" placeholder="Mínimo 6 caracteres">
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">Solo tú la tendrás</div>
+      </div>
+      <div class="f-field">
+        <label>Clave del Entrenador</label>
+        <input class="f-input" id="wClaveTrainer" type="password" placeholder="Mínimo 6 caracteres">
+      </div>
+      <div class="f-field">
+        <label>Clave para Clientes</label>
+        <input class="f-input" id="wClaveCliente" type="password" placeholder="La misma para todos tus clientes">
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">Dásela a todos tus clientes</div>
+      </div>
+      <div id="wClaveErr" style="font-size:11px;color:var(--red);min-height:16px"></div>
+
+      <div class="wizard-nav">
+        <button class="btn btn-outline" onclick="wizardBack(3)" style="flex:1;justify-content:center;clip-path:none">← Atrás</button>
+        <button class="btn btn-lime" onclick="wizardNext(3)" style="flex:2;justify-content:center">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- PASO 4: PLANES Y TELÉFONO -->
+    <div class="wizard-step" id="wstep4">
+      <div class="wizard-title">📋 Últimos detalles</div>
+      <div class="wizard-sub">Configura los planes de membresía y tu WhatsApp para recibir pedidos de la tienda.</div>
+
+      <div class="f-field">
+        <label>Planes y precios (separados por coma)</label>
+        <input class="f-input" id="wPlanes" placeholder="mensual:80000,trimestral:220000">
+      </div>
+      <div class="f-field">
+        <label>📱 WhatsApp del gym</label>
+        <input class="f-input" id="wTel" placeholder="3001234567" type="tel">
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">Para recibir pedidos de la tienda</div>
+      </div>
+      <div class="f-field">
+        <label>🤖 Groq API Key (para IA)</label>
+        <input class="f-input" id="wGroqKey" type="password" placeholder="gsk_...">
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">Consíguela gratis en console.groq.com</div>
+      </div>
+
+      <div class="wizard-nav">
+        <button class="btn btn-outline" onclick="wizardBack(4)" style="flex:1;justify-content:center;clip-path:none">← Atrás</button>
+        <button class="btn btn-lime" onclick="wizardFinalizar()" style="flex:2;justify-content:center">✅ ¡Listo, empezar!</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <div id="splash">
   <div class="splash-ring"></div>
   <div class="splash-gym-name" id="splashGymName">GYM</div>
@@ -365,18 +508,45 @@ select.f-input option{background:var(--s2)}
 
 <!-- ACTIVATION -->
 <div id="actScreen">
-  <div class="act-card">
-    <div class="act-logo">SiryX GYM</div>
-    <div class="act-sub">Activación de licencia</div>
-    <div class="act-field"><label>ID de cliente</label>
-      <input class="act-inp" id="actId" placeholder="ej: gym_olympo" style="font-size:13px;letter-spacing:1px" onkeydown="if(event.key==='Enter')document.getElementById('actKey').focus()">
+  <div class="act-card" style="max-width:360px;width:100%">
+
+    <!-- LOGO GYM -->
+    <div class="act-logo" id="actLogoTxt">SiryX</div>
+    <div class="act-sub" id="actSubTxt">Selecciona cómo ingresar</div>
+
+    <!-- SELECTOR DE ROL -->
+    <div id="rolSelector" style="display:flex;flex-direction:column;gap:8px">
+      <button class="act-btn" style="background:var(--accent);color:#fff" onclick="mostrarLogin('admin')">👑 Ingresar como Administrador</button>
+      <button class="act-btn" style="background:var(--s2);border:1px solid var(--border);color:var(--text)" onclick="mostrarLogin('trainer')">🏋️ Ingresar como Entrenador</button>
+      <button class="act-btn" style="background:var(--s2);border:1px solid var(--border);color:var(--text)" onclick="mostrarLogin('client')">👤 Ingresar como Cliente</button>
     </div>
-    <div class="act-field"><label>Clave de activación</label>
-      <input class="act-inp" id="actKey" placeholder="XXXX-XXXX-XXXX" maxlength="14" onkeydown="if(event.key==='Enter')activar()">
+
+    <!-- LOGIN ADMIN/ENTRENADOR -->
+    <div id="loginStaff" style="display:none;flex-direction:column;gap:10px">
+      <div id="staffRolLabel" style="font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:1px;color:var(--accent);text-align:center;text-transform:uppercase"></div>
+      <div class="act-field"><label>Contraseña</label>
+        <input class="act-inp" id="staffPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')loginStaff()">
+      </div>
+      <div class="act-err" id="staffErr"></div>
+      <button class="act-btn" onclick="loginStaff()">ENTRAR →</button>
+      <button style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;margin-top:4px" onclick="volverSelector()">← Volver</button>
     </div>
-    <div class="act-err" id="actErr"></div>
-    <button class="act-btn" onclick="activar()">ACTIVAR →</button>
-    <div class="act-contact">¿No tienes clave? Contáctanos<br><b>WhatsApp 320 369 4094</b></div>
+
+    <!-- LOGIN CLIENTE -->
+    <div id="loginClient" style="display:none;flex-direction:column;gap:10px">
+      <div style="font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:1px;color:var(--accent);text-align:center;text-transform:uppercase">👤 Acceso Cliente</div>
+      <div class="act-field"><label>Tu nombre</label>
+        <input class="act-inp" id="clienteNombre" placeholder="Ej: María García" onkeydown="if(event.key==='Enter')document.getElementById('claveCliente').focus()">
+      </div>
+      <div class="act-field"><label>Clave del gym</label>
+        <input class="act-inp" id="claveCliente" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')loginCliente()">
+      </div>
+      <div class="act-err" id="actErr"></div>
+      <button class="act-btn" onclick="loginCliente()">ENTRAR →</button>
+      <button style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;margin-top:4px" onclick="volverSelector()">← Volver</button>
+      <div class="act-contact">¿No tienes clave? Pídela en tu gym</div>
+    </div>
+
   </div>
 </div>
 
@@ -390,6 +560,7 @@ select.f-input option{background:var(--s2)}
     <div class="clock" id="clockEl">--:--</div>
     <div class="role-badge role-admin" id="roleBadge">Admin</div>
     <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
+    <button class="icon-btn" onclick="cerrarSesion()" title="Cerrar sesión" style="font-size:12px">🚪</button>
     <button class="icon-btn" onclick="openCfg()" title="Configuración">⚙️</button>
   </div>
 </header>
@@ -767,8 +938,15 @@ function activar(){
   const ff=new Date(dec.ff+'T23:59:59');
   const g=new Date(ff);g.setDate(g.getDate()+2);
   if(new Date()>g){err.textContent='Esta clave ya venció. Solicita la nueva.';return;}
-  lic={activa:true,cid,fi:dec.fi,ff:dec.ff,activado:new Date().toISOString()};
+  const _fp=generarFingerprint();
+  lic={activa:true,cid,fi:dec.fi,ff:dec.ff,activado:new Date().toISOString(),fingerprint:_fp};
   localStorage.setItem('sg_lic',JSON.stringify(lic));
+  // Buscar el miembro con ese ID y configurar como cliente
+  const miembroCliente=miembros.find(m=>m.id===cid||m.doc===cid||
+    m.nombre.toLowerCase().replace(/\s+/g,'_')===cid.toLowerCase());
+  if(miembroCliente){ cfg.clienteActivo=miembroCliente.id; clienteActivo=miembroCliente.id; }
+  cfg.rol='client'; rol='client';
+  sessionStorage.setItem('sg_sesion',JSON.stringify({rol:'client',ts:Date.now()}));
   document.getElementById('actScreen').classList.remove('show');
   iniciarApp();
   toast(`✅ Licencia activa hasta ${fmtF(dec.ff)}`);
@@ -990,6 +1168,7 @@ function renderMiembrosHTML(){
         <div class="progress-wrap" style="margin-top:5px"><div class="progress-fill ${progCls}" style="width:${pct}%"></div></div>
       </div>
       <div class="member-status">
+        ${m.bloqueado?'<span class="badge" style="background:rgba(255,30,30,.15);color:#ff4444;border:1px solid #ff4444;margin-bottom:3px">🔒 Sin acceso</span><br>':''}
         <span class="badge ${s.cls}">${s.label}</span>
         ${rol==='admin'||rol==='trainer'?`<div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">
           ${rol==='admin'?`<button class="btn-xs btn-xs-lime" onclick="event.stopPropagation();renovarRapido('${m.id}')" title="Renovar">↻</button>`:''}
@@ -1431,6 +1610,9 @@ function openCfg(){
   document.getElementById('cfgOpenAI').value=cfg.openaiKey||'';
   document.getElementById('cfgGroq').value=cfg.groqKey||'';
   if(document.getElementById('cfgTelGym')) document.getElementById('cfgTelGym').value=cfg.telGym||'';
+  if(document.getElementById('cfgClaveAdmin')) document.getElementById('cfgClaveAdmin').value=cfg.claveAdmin||'';
+  if(document.getElementById('cfgClaveTrainer')) document.getElementById('cfgClaveTrainer').value=cfg.claveTrainer||'';
+  if(document.getElementById('cfgClaveCliente')) document.getElementById('cfgClaveCliente').value=cfg.claveCliente||'';
   if(cfg.logoGym) mostrarLogoGym(cfg.logoGym);
   initColorPicker();
   const sel=document.getElementById('cfgClienteSel');
@@ -1446,6 +1628,12 @@ function toggleClienteWrap(){
 function closeCfg(){ document.getElementById('modalCfg').classList.remove('open'); }
 function guardarCfg(){
   if(document.getElementById('cfgTelGym')) cfg.telGym=document.getElementById('cfgTelGym').value.trim();
+  const ca=document.getElementById('cfgClaveAdmin');
+  const ct=document.getElementById('cfgClaveTrainer');
+  if(ca&&ca.value.trim()) cfg.claveAdmin=ca.value.trim();
+  if(ct&&ct.value.trim()) cfg.claveTrainer=ct.value.trim();
+  const cc=document.getElementById('cfgClaveCliente');
+  if(cc&&cc.value.trim()) cfg.claveCliente=cc.value.trim();
   const colorEl=document.getElementById('cfgColorCustom');
   if(colorEl&&colorEl.value){
     cfg.accentColor=colorEl.value;
@@ -3191,11 +3379,271 @@ function previsualizarFoto(e){
   reader.readAsDataURL(file);
 }
 
+// ══════════════════════════════════════════
+//  SISTEMA DE LOGIN POR ROLES
+// ══════════════════════════════════════════
+
+// Claves por defecto — el admin puede cambiarlas en Configuración
+function getClaves(){
+  return {
+    admin:   cfg.claveAdmin   || 'admin2024',
+    trainer: cfg.claveTrainer || 'trainer2024'
+  };
+}
+
+let rolLoginActual = '';
+
+function mostrarLogin(tipo){
+  document.getElementById('rolSelector').style.display='none';
+  if(tipo==='client'){
+    document.getElementById('loginClient').style.display='flex';
+  } else {
+    document.getElementById('loginStaff').style.display='flex';
+    document.getElementById('staffRolLabel').textContent = tipo==='admin'?'👑 Administrador':'🏋️ Entrenador';
+    document.getElementById('staffPass').value='';
+    document.getElementById('staffErr').textContent='';
+    setTimeout(()=>document.getElementById('staffPass').focus(),100);
+  }
+  rolLoginActual=tipo;
+}
+
+function volverSelector(){
+  document.getElementById('loginStaff').style.display='none';
+  document.getElementById('loginClient').style.display='none';
+  document.getElementById('rolSelector').style.display='flex';
+  rolLoginActual='';
+}
+
+function loginCliente(){
+  const nombre=document.getElementById('clienteNombre').value.trim();
+  const clave=document.getElementById('claveCliente').value;
+  const err=document.getElementById('actErr');
+  if(!nombre){err.textContent='Ingresa tu nombre';return;}
+  if(!clave){err.textContent='Ingresa la clave del gym';return;}
+  const claveGym=cfg.claveCliente||'cliente2024';
+  if(clave!==claveGym){
+    err.textContent='Clave incorrecta. Consulta con tu gym.';
+    document.getElementById('claveCliente').value='';
+    if(navigator.vibrate) navigator.vibrate(200);
+    return;
+  }
+  // Verificar si el cliente está bloqueado
+  const nombreBuscar=nombre.toLowerCase().trim();
+  const miembroCheck=miembros.find(m=>m.nombre.toLowerCase().trim()===nombreBuscar);
+  if(miembroCheck&&miembroCheck.bloqueado){
+    err.textContent='Tu acceso ha sido suspendido. Contacta a tu gym para más información.';
+    document.getElementById('claveCliente').value='';
+    if(navigator.vibrate) navigator.vibrate([200,100,200]);
+    return;
+  }
+  // Buscar si ya existe un miembro con ese nombre
+  let miembroEncontrado=miembros.find(m=>
+    m.nombre.toLowerCase().trim()===nombre.toLowerCase().trim()
+  );
+  // Si no existe, crear un perfil temporal
+  if(!miembroEncontrado){
+    const nuevoId='cli_'+nombre.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'');
+    miembroEncontrado={id:nuevoId,nombre:nombre,activo:true,creadoEl:new Date().toISOString(),temporal:true};
+    miembros.push(miembroEncontrado);
+    save();
+  }
+  cfg.clienteActivo=miembroEncontrado.id;
+  clienteActivo=miembroEncontrado.id;
+  cfg.rol='client'; rol='client';
+  sessionStorage.setItem('sg_sesion',JSON.stringify({rol:'client',clienteActivo:miembroEncontrado.id,ts:Date.now()}));
+  document.getElementById('actScreen').classList.remove('show');
+  iniciarApp();
+}
+
+function loginStaff(){
+  const pass=document.getElementById('staffPass').value;
+  const err=document.getElementById('staffErr');
+  const claves=getClaves();
+  if(!pass){ err.textContent='Ingresa la contraseña'; return; }
+  if(rolLoginActual==='admin' && pass===claves.admin){
+    cfg.rol='admin'; rol='admin';
+    // Guardar sesión temporal
+    sessionStorage.setItem('sg_sesion',JSON.stringify({rol:'admin',ts:Date.now()}));
+    document.getElementById('actScreen').classList.remove('show');
+    iniciarApp();
+  } else if(rolLoginActual==='trainer' && pass===claves.trainer){
+    cfg.rol='trainer'; rol='trainer';
+    sessionStorage.setItem('sg_sesion',JSON.stringify({rol:'trainer',ts:Date.now()}));
+    document.getElementById('actScreen').classList.remove('show');
+    iniciarApp();
+  } else {
+    err.textContent='Contraseña incorrecta';
+    document.getElementById('staffPass').value='';
+    document.getElementById('staffPass').focus();
+    // Vibrar si está disponible
+    if(navigator.vibrate) navigator.vibrate(200);
+  }
+}
+
+function cerrarSesion(){
+  sessionStorage.removeItem('sg_sesion');
+  cfg.rol=''; rol='';
+  // Volver al selector
+  volverSelector();
+  document.getElementById('actScreen').classList.add('show');
+}
+
+
+// ══ CONTROL DE ACCESO POR CLIENTE ══
+function toggleAcceso(mid){
+  const m=miembros.find(m=>m.id===mid); if(!m) return;
+  m.bloqueado=!m.bloqueado;
+  save();
+  const accion=m.bloqueado?'bloqueado':'habilitado';
+  toast((m.bloqueado?'🔒':'🔓')+' Acceso '+accion+' para '+m.nombre);
+  renderTab('miembros');
+}
+
+
+// ══════════════════════════════════════════
+//  SETUP WIZARD — Primera vez
+// ══════════════════════════════════════════
+let wizardColorSel = '#0066FF';
+let wizardLogoData = '';
+
+function wizardNext(paso){
+  if(paso===1){
+    const nombre=document.getElementById('wNombre').value.trim();
+    if(!nombre){
+      document.getElementById('wNombre').style.borderBottomColor='var(--red)';
+      document.getElementById('wNombre').focus();
+      toast('❌ Escribe el nombre de tu gym');
+      return;
+    }
+    document.getElementById('wNombre').style.borderBottomColor='';
+  }
+  if(paso===3){
+    const ca=document.getElementById('wClaveAdmin').value;
+    const ct=document.getElementById('wClaveTrainer').value;
+    const cc=document.getElementById('wClaveCliente').value;
+    const err=document.getElementById('wClaveErr');
+    if(!ca||ca.length<4){err.textContent='La clave de admin debe tener al menos 4 caracteres';return;}
+    if(!ct||ct.length<4){err.textContent='La clave del entrenador debe tener al menos 4 caracteres';return;}
+    if(!cc||cc.length<4){err.textContent='La clave de clientes debe tener al menos 4 caracteres';return;}
+    err.textContent='';
+  }
+  // Avanzar paso
+  document.getElementById('wstep'+paso).classList.remove('active');
+  document.getElementById('wstep'+(paso+1)).classList.add('active');
+  document.getElementById('wdot'+(paso+1)).classList.add('done');
+  // Aplicar color en tiempo real
+  if(paso===1) aplicarColor(wizardColorSel);
+}
+
+function wizardBack(paso){
+  document.getElementById('wstep'+paso).classList.remove('active');
+  document.getElementById('wstep'+(paso-1)).classList.add('active');
+  document.getElementById('wdot'+paso).classList.remove('done');
+}
+
+function wSelColor(hex, el){
+  wizardColorSel=hex;
+  document.querySelectorAll('.color-preset-wiz').forEach(p=>p.classList.remove('selected'));
+  if(el) el.classList.add('selected');
+  aplicarColor(hex);
+}
+
+function wHandleLogo(e){
+  const file=e.target.files[0]; if(!file) return;
+  if(file.size>2*1024*1024){toast('❌ Imagen muy grande. Máximo 2MB');return;}
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    wizardLogoData=ev.target.result;
+    const wrap=document.getElementById('wLogoWrap');
+    const img=document.getElementById('wLogoImg');
+    const emoji=document.getElementById('wLogoEmoji');
+    if(img&&emoji){img.src=ev.target.result;img.style.display='block';emoji.style.display='none';}
+  };
+  reader.readAsDataURL(file);
+}
+
+function wizardFinalizar(){
+  // Guardar toda la configuración
+  cfg.gym = document.getElementById('wNombre').value.trim();
+  cfg.eslogan = document.getElementById('wEslogan').value.trim();
+  cfg.accentColor = wizardColorSel;
+  if(wizardLogoData) cfg.logoGym = wizardLogoData;
+  cfg.claveAdmin   = document.getElementById('wClaveAdmin').value;
+  cfg.claveTrainer = document.getElementById('wClaveTrainer').value;
+  cfg.claveCliente = document.getElementById('wClaveCliente').value;
+  cfg.planes = document.getElementById('wPlanes').value.trim();
+  cfg.telGym = document.getElementById('wTel').value.trim();
+  const gk=document.getElementById('wGroqKey').value.trim();
+  if(gk) cfg.groqKey=gk;
+  cfg.wizardCompletado = true;
+  save();
+  aplicarColor(wizardColorSel);
+  // Ocultar wizard y mostrar login
+  document.getElementById('wizardScreen').classList.remove('show');
+  // Actualizar splash con nombre del gym
+  const splashEl=document.getElementById('splashGymName');
+  if(splashEl) splashEl.textContent=cfg.gym.toUpperCase();
+  // Ir directo como admin (primera vez)
+  cfg.rol='admin'; rol='admin';
+  sessionStorage.setItem('sg_sesion',JSON.stringify({rol:'admin',ts:Date.now()}));
+  iniciarApp();
+  toast('✅ ¡'+cfg.gym+' configurado correctamente!');
+}
+
+
+// ══════════════════════════════════════════
+//  LICENCIA DEL GYM — mismo algoritmo keygen
+// ══════════════════════════════════════════
+const GYM_SECRET='SiryX2024$Connect#';
+
+function hashGym(str){
+  let h=5381;
+  for(let i=0;i<str.length;i++) h=((h<<5)+h)^str.charCodeAt(i);
+  return Math.abs(h);
+}
+
+function verificarLicenciaGym(gymId, key){
+  try{
+    const p=key.trim().toUpperCase().split('-');
+    if(p.length!==3) return false;
+    const dI=parseInt(p[0],36);
+    const dF=parseInt(p[1],36);
+    const ck=p[2];
+    const seed=GYM_SECRET+'|'+gymId.toLowerCase().trim()+'|'+dI+'|'+dF;
+    const exp=('000'+(hashGym(seed)%9999+1000)).slice(-4);
+    if(ck!==exp) return false;
+    const hoy=Math.floor(Date.now()/86400000);
+    return hoy>=dI && hoy<=dF+2;
+  }catch(e){ return false; }
+}
+
+function mostrarBloqueoGym(){
+  const splash=document.getElementById('splash');
+  if(splash) splash.style.display='none';
+  document.body.insertAdjacentHTML('beforeend',
+    '<div style="position:fixed;inset:0;background:#000;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:Oswald,sans-serif;text-align:center;padding:20px">'
+    +'<div style="font-size:56px">🔒</div>'
+    +'<div style="font-size:26px;letter-spacing:4px;color:#0066FF">SERVICIO SUSPENDIDO</div>'
+    +'<div style="font-size:14px;color:#555;max-width:300px;line-height:1.7">El plan de este gimnasio ha vencido o no está activo.</div>'
+    +'<div style="font-size:13px;color:#333;margin-top:4px">Para reactivar contacta a:</div>'
+    +'<div style="font-size:15px;color:#fff;font-weight:700;letter-spacing:2px">SiryX Connect</div>'
+    +'<a href="https://wa.me/573203694094" style="background:#0066FF;color:#fff;padding:12px 28px;font-family:Oswald,sans-serif;font-size:14px;letter-spacing:2px;text-decoration:none;margin-top:8px;display:block">📱 CONTACTAR AHORA</a>'
+    +'</div>'
+  );
+}
+
+
 applyTheme();
-// Cargar key de config.js si está disponible
+// Cargar configuración de config.js
 if(window.SIRYX_CONFIG){
   if(window.SIRYX_CONFIG.groqKey && !cfg.groqKey){
     cfg.groqKey = window.SIRYX_CONFIG.groqKey;
+  }
+  // Verificar licencia del gym — misma lógica que el keygen
+  if(window.SIRYX_CONFIG.gymId && window.SIRYX_CONFIG.gymKey){
+    if(!verificarLicenciaGym(window.SIRYX_CONFIG.gymId, window.SIRYX_CONFIG.gymKey)){
+      mostrarBloqueoGym();
+    }
   }
 }
 // Aplicar color guardado inmediatamente antes del splash
@@ -3208,8 +3656,43 @@ if(splashName) splashName.textContent = cfg.gym ? cfg.gym.toUpperCase() : 'SIRYX
 setTimeout(()=>{
   document.getElementById('splash').classList.add('out');
   setTimeout(()=>document.getElementById('splash').style.display='none',600);
-  iniciarApp();
+  
+  // Verificar si hay sesión activa (menos de 8 horas)
+  const sesion=JSON.parse(sessionStorage.getItem('sg_sesion')||'null');
+  const sesionValida=sesion&&(Date.now()-sesion.ts)<8*60*60*1000;
+  
+  if(sesionValida){
+    cfg.rol=sesion.rol; rol=sesion.rol;
+    if(rol==='client'&&sesion.clienteActivo){
+      cfg.clienteActivo=sesion.clienteActivo;
+      clienteActivo=sesion.clienteActivo;
+      iniciarApp();
+    } else if(rol==='admin'||rol==='trainer'){
+      iniciarApp();
+    } else {
+      mostrarPantallaLogin();
+    }
+  } else {
+    mostrarPantallaLogin();
+  }
 },2200);
+
+function mostrarPantallaLogin(){
+  // Verificar si es la primera vez — mostrar wizard
+  if(!cfg.wizardCompletado && !cfg.gym){
+    document.getElementById('wizardScreen').classList.add('show');
+    return;
+  }
+  // Actualizar texto del gym en la pantalla de login
+  const logoEl=document.getElementById('actLogoTxt');
+  if(logoEl&&cfg.gym) logoEl.textContent=cfg.gym.toUpperCase();
+  // Actualizar logo si existe
+  if(cfg.logoGym){
+    const logoImgEl=document.getElementById('actLogoTxt');
+    // Solo texto, el logo va en el header
+  }
+  document.getElementById('actScreen').classList.add('show');
+}
 </script>
 </body>
 </html>
