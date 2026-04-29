@@ -334,6 +334,21 @@ select.f-input option{background:var(--s2)}
 .client-card-big::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(0,102,255,.05);border:1px solid rgba(0,102,255,.1)}
 .client-dias-num{font-family:'Oswald',sans-serif;font-size:52px;color:var(--accent);line-height:1}
 .client-dias-lbl{font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+
+/* ══ TIENDA ══ */
+.productos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.producto-card{background:var(--s1);border:1px solid var(--border);border-radius:0;overflow:hidden;display:flex;flex-direction:column;transition:all .15s}
+.producto-card:hover{border-color:var(--accent)}
+.producto-img{width:100%;height:160px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:48px;overflow:hidden;flex-shrink:0}
+.producto-img img{width:100%;height:100%;object-fit:cover;display:block}
+.producto-body{padding:12px;display:flex;flex-direction:column;gap:4px;flex:1}
+.producto-nombre{font-family:'Oswald',sans-serif;font-size:15px;font-weight:600;letter-spacing:.5px}
+.producto-precio-antes{font-size:11px;color:var(--muted);text-decoration:line-through}
+.producto-precio{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--accent)}
+.producto-promo{background:var(--red);color:#fff;font-size:10px;font-weight:700;font-family:'Oswald',sans-serif;letter-spacing:1px;padding:2px 8px;display:inline-block;margin-bottom:4px}
+.carrito-item{display:flex;align-items:center;gap:8px;padding:8px;background:var(--s2);border:1px solid var(--border);margin-bottom:4px}
+.carrito-qty{display:flex;align-items:center;gap:6px}
+.qty-btn{background:var(--s3);border:none;color:var(--text);width:26px;height:26px;font-size:16px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center}
 </style>
 <!-- Configuración SiryX — no modificar -->
 <script src="config.js" onerror="console.warn('config.js no encontrado')"></script>
@@ -394,6 +409,13 @@ select.f-input option{background:var(--s2)}
     <div class="form-grid">
       <div class="f-field full"><label>Nombre completo</label><input class="f-input" id="mNombre" placeholder="Juan García"></div>
       <div class="f-field"><label>Teléfono</label><input class="f-input" id="mTel" placeholder="300 000 0000"></div>
+      <div class="f-field"><label>Género</label>
+        <select class="f-input" id="mGenero">
+          <option value="mujer">Mujer</option>
+          <option value="hombre">Hombre</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
       <div class="f-field"><label>Documento</label><input class="f-input" id="mDoc" placeholder="CC 123456"></div>
       <div class="f-field"><label>Plan</label>
         <select class="f-input" id="mPlan">
@@ -416,6 +438,94 @@ select.f-input option{background:var(--s2)}
 </div>
 
 <!-- MODAL RUTINA -->
+<!-- MODAL CAMBIO DE RUTINA -->
+<div class="modal-overlay" id="modalCambioRutina">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-title">🏋️ Cambiar rutina
+      <button class="modal-close" onclick="document.getElementById('modalCambioRutina').classList.remove('open')">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Miembro: <b id="cambioRutinaNombre">—</b></div>
+    <input type="hidden" id="cambioRutinaMid">
+
+    <div class="f-field"><label>Nuevo objetivo</label>
+      <select class="f-input" id="crObjetivo">
+        <option value="perder peso y tonificar">Perder peso y tonificar</option>
+        <option value="ganar músculo">Ganar músculo</option>
+        <option value="mejorar glúteos y piernas">Glúteos y piernas</option>
+        <option value="tonificar general">Tonificar general</option>
+        <option value="fuerza">Ganar fuerza</option>
+        <option value="mejorar resistencia">Mejorar resistencia</option>
+      </select>
+    </div>
+    <div class="f-field"><label>Nivel actual</label>
+      <select class="f-input" id="crNivel">
+        <option value="principiante">Principiante</option>
+        <option value="intermedio">Intermedio</option>
+        <option value="avanzado">Avanzado</option>
+      </select>
+    </div>
+    <div class="f-field"><label>Días por semana</label>
+      <select class="f-input" id="crDias">
+        <option value="2">2 días</option>
+        <option value="3" selected>3 días</option>
+        <option value="4">4 días</option>
+        <option value="5">5 días</option>
+      </select>
+    </div>
+
+    <div style="font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:1px;color:var(--accent);text-transform:uppercase;margin-bottom:8px">🎯 Zonas a enfocarse</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px" id="crZonasGrid">
+      <div onclick="toggleZona(this)" data-zona="🍑 Glúteos" style="padding:8px 10px;background:var(--s2);border:1px solid var(--border);cursor:pointer;font-size:12px;font-family:'Oswald',sans-serif;letter-spacing:.5px;transition:all .15s;text-align:center">🍑 Glúteos</div>
+      <div onclick="toggleZona(this)" data-zona="🦵 Piernas" style="padding:8px 10px;background:var(--s2);border:1px solid var(--border);cursor:pointer;font-size:12px;font-family:'Oswald',sans-serif;letter-spacing:.5px;transition:all .15s;text-align:center">🦵 Piernas</div>
+      <div onclick="toggleZona(this)" data-zona="⬛ Cintura delgada" style="padding:8px 10px;background:var(--s2);border:1px solid var(--border);cursor:pointer;font-size:12px;font-family:'Oswald',sans-serif;letter-spacing:.5px;transition:all .15s;text-align:center">⬛ Cintura delgada</div>
+      <div onclick="toggleZona(this)" data-zona="💪 Brazos" style="padding:8px 10px;background:var(--s2);border:1px solid var(--border);cursor:pointer;font-size:12px;font-family:'Oswald',sans-serif;letter-spacing:.5px;transition:all .15s;text-align:center">💪 Brazos</div>
+      <div onclick="toggleZona(this)" data-zona="🔝 Hombros" style="padding:8px 10px;background:var(--s2);border:1px solid var(--border);cursor:pointer;font-size:12px;font-family:'Oswald',sans-serif;letter-spacing:.5px;transition:all .15s;text-align:center">🔝 Hombros</div>
+      <div onclick="toggleZona(this)" data-zona="🏋️ Espalda" style="padding:8px 10px;background:var(--s2);border:1px solid var(--border);cursor:pointer;font-size:12px;font-family:'Oswald',sans-serif;letter-spacing:.5px;transition:all .15s;text-align:center">🏋️ Espalda</div>
+      <div onclick="toggleZona(this)" data-zona="🫀 Pecho" style="padding:8px 10px;background:var(--s2);border:1px solid var(--border);cursor:pointer;font-size:12px;font-family:'Oswald',sans-serif;letter-spacing:.5px;transition:all .15s;text-align:center">🫀 Pecho</div>
+      <div onclick="toggleZona(this)" data-zona="🦶 Pantorrillas" style="padding:8px 10px;background:var(--s2);border:1px solid var(--border);cursor:pointer;font-size:12px;font-family:'Oswald',sans-serif;letter-spacing:.5px;transition:all .15s;text-align:center">🦶 Pantorrillas</div>
+    </div>
+
+    <div class="f-field"><label>Lesiones o limitaciones</label>
+      <input class="f-input" id="crLesion" placeholder="Ej: dolor de rodilla, ninguna...">
+    </div>
+
+    <div class="modal-row" style="margin-top:8px">
+      <button class="btn btn-outline" onclick="document.getElementById('modalCambioRutina').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-lime" onclick="generarNuevaRutinaAdmin()">✨ Generar nueva rutina</button>
+    </div>
+    <div class="status-bar" id="crStatus" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<!-- MODAL MEDIDAS INICIALES -->
+<div class="modal-overlay" id="modalMedidas">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-title">📏 Medidas iniciales
+      <button class="modal-close" onclick="document.getElementById('modalMedidas').classList.remove('open')">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Miembro: <b id="medidasNombreLabel">—</b></div>
+    <input type="hidden" id="medidasMiembroId">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="f-field"><label>Peso (kg)</label><input class="f-input" id="mdiPeso" type="number" placeholder="70" step="0.1"></div>
+      <div class="f-field"><label>Altura (cm)</label><input class="f-input" id="mdiAltura" type="number" placeholder="170" step="0.1"></div>
+      <div class="f-field"><label>Cuello (cm)</label><input class="f-input" id="mdiCuello" type="number" placeholder="35" step="0.1"></div>
+      <div class="f-field"><label>Pecho (cm)</label><input class="f-input" id="mdiPecho" type="number" placeholder="95" step="0.1"></div>
+      <div class="f-field"><label>Brazo derecho (cm)</label><input class="f-input" id="mdiBrazoD" type="number" placeholder="32" step="0.1"></div>
+      <div class="f-field"><label>Brazo izquierdo (cm)</label><input class="f-input" id="mdiBrazoI" type="number" placeholder="32" step="0.1"></div>
+      <div class="f-field"><label>Cintura (cm)</label><input class="f-input" id="mdiCintura" type="number" placeholder="75" step="0.1"></div>
+      <div class="f-field"><label>Cadera (cm)</label><input class="f-input" id="mdiCadera" type="number" placeholder="95" step="0.1"></div>
+      <div class="f-field"><label>Pierna derecha (cm)</label><input class="f-input" id="mdiPiernaD" type="number" placeholder="55" step="0.1"></div>
+      <div class="f-field"><label>Pierna izquierda (cm)</label><input class="f-input" id="mdiPiernaI" type="number" placeholder="55" step="0.1"></div>
+      <div class="f-field"><label>Pantorrilla derecha (cm)</label><input class="f-input" id="mdiPantorrD" type="number" placeholder="35" step="0.1"></div>
+      <div class="f-field"><label>Pantorrilla izquierda (cm)</label><input class="f-input" id="mdiPantorrI" type="number" placeholder="35" step="0.1"></div>
+    </div>
+    <div class="modal-row" style="margin-top:8px">
+      <button class="btn btn-outline" onclick="document.getElementById('modalMedidas').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-lime" onclick="guardarMedidasIni()">💾 Guardar medidas</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modalRutina">
   <div class="modal">
     <div class="modal-title">
@@ -509,6 +619,9 @@ select.f-input option{background:var(--s2)}
       <div style="border-top:1px solid var(--border);padding-top:12px">
         <div class="f-field"><label>Planes y precios (separados por coma)</label>
           <input class="f-input" id="cfgPlanes" placeholder="mensual:80000,trimestral:220000">
+        </div>
+        <div class="f-field" style="margin-top:8px"><label>📱 WhatsApp del gym (para recibir pedidos)</label>
+          <input class="f-input" id="cfgTelGym" placeholder="3203694094">
         </div>
       </div>
 
@@ -689,6 +802,7 @@ function renderTabs(){
       {id:'pagos',icon:'💰',label:'Pagos'},
       {id:'ia',icon:'🤖',label:'IA'},
       {id:'clases',icon:'📅',label:'Clases'},
+      {id:'tienda',icon:'🛍️',label:'Tienda'},
       {id:'mensajes',icon:'💬',label:'Mensajes'},
     ];
     document.getElementById('roleBadge').textContent='Admin';
@@ -713,6 +827,7 @@ function renderTabs(){
       {id:'minutricion',  icon:'🍽', label:'Nutrición'},
       {id:'milogros',     icon:'🏆', label:'Logros'},
       {id:'misclases',    icon:'📅', label:'Clases'},
+      {id:'mitienda',     icon:'🛍️', label:'Tienda'},
       {id:'micoach',      icon:'🤖', label:'Mi Coach'},
     ];
     document.getElementById('roleBadge').textContent='Cliente';
@@ -753,6 +868,8 @@ function renderTab(id){
     miasistencia: renderMiAsistenciaHTML,
     micoach:      renderMiCoachHTML,
     mensajes:     renderMensajesHTML,
+    tienda:       renderTiendaAdminHTML,
+    mitienda:     renderMiTiendaHTML,
   }[id];
 
   if(html){
@@ -776,6 +893,10 @@ function renderDashboardHTML(){
 
   // Alertas vencidos
   const alertas=miembros.filter(m=>statusMiembro(m).cls==='badge-exp'||statusMiembro(m).cls==='badge-warn');
+
+  // Ausentes hoy (resumen rápido en dashboard)
+  const hoyPresentes=new Set(asistencia.filter(a=>a.fecha===hoyStr).map(a=>a.miembroId));
+  const ausentesHoy=miembros.filter(m=>m.activo&&statusMiembro(m).cls!=='badge-frozen'&&statusMiembro(m).cls!=='badge-exp'&&!hoyPresentes.has(m.id));
 
   let alertHTML='';
   if(alertas.length){
@@ -870,9 +991,11 @@ function renderMiembrosHTML(){
       </div>
       <div class="member-status">
         <span class="badge ${s.cls}">${s.label}</span>
-        ${rol==='admin'?`<div style="display:flex;gap:4px;margin-top:4px">
-          <button class="btn-xs btn-xs-lime" onclick="event.stopPropagation();renovarRapido('${m.id}')">↻</button>
-          <button class="btn-xs btn-xs-outline" onclick="event.stopPropagation();editarMiembro('${m.id}')">✏</button>
+        ${rol==='admin'||rol==='trainer'?`<div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">
+          ${rol==='admin'?`<button class="btn-xs btn-xs-lime" onclick="event.stopPropagation();renovarRapido('${m.id}')" title="Renovar">↻</button>`:''}
+          <button class="btn-xs btn-xs-outline" onclick="event.stopPropagation();editarMiembro('${m.id}')" title="Editar">✏</button>
+          <button class="btn-xs btn-xs-outline" onclick="event.stopPropagation();abrirMedidas('${m.id}','${m.nombre}')" title="Medidas iniciales">📏</button>
+          <button class="btn-xs btn-xs-outline" onclick="event.stopPropagation();abrirCambioRutina('${m.id}','${m.nombre}')" title="Cambiar rutina">🏋️</button>
         </div>`:''}
       </div>
     </div>`;
@@ -935,7 +1058,7 @@ function guardarMiembro(){
     }
   } else {
     const id='m'+Date.now();
-    miembros.push({id,nombre,tel:document.getElementById('mTel').value,doc:document.getElementById('mDoc').value,plan,fechaInicio:fi,fechaFin:ff,obs:document.getElementById('mObs').value,activo:true,creadoEl:new Date().toISOString()});
+    miembros.push({id,nombre,tel:document.getElementById('mTel').value,doc:document.getElementById('mDoc').value,genero:document.getElementById('mGenero')?.value||'',plan,fechaInicio:fi,fechaFin:ff,obs:document.getElementById('mObs').value,activo:true,creadoEl:new Date().toISOString()});
     if(valor>0) pagos.push({id:'p'+Date.now(),miembroId:id,nombre,plan,valor,fecha:hoy(),tipo:'nueva'});
   }
   save();closeMiembro();renderTab('miembros');toast('✅ Miembro guardado');
@@ -979,6 +1102,8 @@ function renderAsistenciaHTML(){
   const registradosHoy=new Set(asistencia.filter(a=>a.fecha===hoyStr).map(a=>a.miembroId));
   const activos=miembros.filter(m=>m.activo&&statusMiembro(m).cls!=='badge-frozen');
 
+  const presentesSet=new Set(asistencia.filter(a=>a.fecha===hoyStr).map(a=>a.miembroId));
+  const ausentes=activos.filter(m=>!presentesSet.has(m.id));
   const grid=activos.map((m,i)=>{
     const checked=registradosHoy.has(m.id);
     const hora=asistencia.find(a=>a.miembroId===m.id&&a.fecha===hoyStr)?.hora||'';
@@ -994,7 +1119,10 @@ function renderAsistenciaHTML(){
     return `<div class="alert alert-ok">✅ <b>${m?.nombre||a.nombre}</b> — ${a.hora}</div>`;
   }).reverse().join('') || '<div style="color:var(--muted);font-size:12px;padding:10px 0">Nadie registrado hoy aún</div>';
 
-  return `
+  // Ausentes hoy
+  const ausDiv = '<div class="card"><div class="card-title" style="color:var(--orange)">⚠️ Ausentes hoy <span style="font-size:11px">'+ausentes.length+' sin venir</span></div>'+renderAusenciasHTML()+'</div>';
+
+  return ausDiv + `
   <div class="card">
     <div class="card-title">📅 Check-in de hoy — ${new Date().toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long'})} <span>${registradosHoy.size} registrados</span></div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px">${grid||'<div style="color:var(--muted);font-size:12px">No hay miembros activos</div>'}</div>
@@ -1302,6 +1430,7 @@ function openCfg(){
   document.getElementById('cfgPlanes').value=cfg.planes||'';
   document.getElementById('cfgOpenAI').value=cfg.openaiKey||'';
   document.getElementById('cfgGroq').value=cfg.groqKey||'';
+  if(document.getElementById('cfgTelGym')) document.getElementById('cfgTelGym').value=cfg.telGym||'';
   if(cfg.logoGym) mostrarLogoGym(cfg.logoGym);
   initColorPicker();
   const sel=document.getElementById('cfgClienteSel');
@@ -1316,6 +1445,7 @@ function toggleClienteWrap(){
 }
 function closeCfg(){ document.getElementById('modalCfg').classList.remove('open'); }
 function guardarCfg(){
+  if(document.getElementById('cfgTelGym')) cfg.telGym=document.getElementById('cfgTelGym').value.trim();
   const colorEl=document.getElementById('cfgColorCustom');
   if(colorEl&&colorEl.value){
     cfg.accentColor=colorEl.value;
@@ -1844,22 +1974,28 @@ function renderMiProgresoHTML(){
   </div>`;
 
   // Historial
+  const medIniH=JSON.parse(localStorage.getItem('sg_medidas_ini_'+m.id)||'{}');
   const hist=registros.slice().reverse().slice(0,10);
   const histHTML=hist.length ? hist.map((r,i)=>{
-    const prev=hist[i+1];
-    const diff=prev?((r.peso-prev.peso)>0?'+':'')+(r.peso-prev.peso).toFixed(1)+'kg':'';
-    const cls=diff?diff.startsWith('+')?'up':'down':'eq';
-    return `<div class="prog-entry">
-      <div>
-        <div class="prog-fecha">${fmtF(r.fecha)}</div>
-        ${r.nota?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${r.nota}</div>`:''}
-      </div>
-      <div style="text-align:right">
-        <div class="prog-val">${r.peso||'—'} kg</div>
-        ${diff?`<div class="prog-diff ${cls}" style="font-size:11px;font-family:var(--mono)">${diff}</div>`:''}
-      </div>
-    </div>`;
-  }).join('') : '<div style="color:var(--muted);font-size:12px;padding:10px">Sin registros aún</div>';
+    const prev=hist[i+1]||medIniH;
+    const diffPeso=prev.peso?((r.peso-prev.peso)>0?'+':'')+(r.peso-prev.peso).toFixed(1)+'kg':'';
+    const diffCintura=prev.cintura&&r.cintura?((r.cintura-prev.cintura)>0?'+':'')+(r.cintura-prev.cintura).toFixed(1)+'cm':'';
+    const diffCadera=prev.cadera&&r.cadera?((r.cadera-prev.cadera)>0?'+':'')+(r.cadera-prev.cadera).toFixed(1)+'cm':'';
+    const pesoOk=diffPeso.startsWith('-');
+    return '<div class="prog-entry">'
+      +'<div><div class="prog-fecha">'+fmtF(r.fecha)+'</div>'
+      +(r.nota?'<div style="font-size:11px;color:var(--muted);margin-top:2px">'+r.nota+'</div>':'')
+      +'<div style="font-size:10px;color:var(--muted);margin-top:3px;font-family:var(--mono)">'
+      +(r.cintura?'👗 Cintura: '+r.cintura+'cm':'')
+      +(r.cadera?' · Cadera: '+r.cadera+'cm':'')
+      +(r.brazoD?' · Brazo: '+r.brazoD+'cm':'')
+      +'</div></div>'
+      +'<div style="text-align:right">'
+      +'<div class="prog-val">'+r.peso+' kg</div>'
+      +(diffPeso?'<div class="prog-diff '+(pesoOk?'down':'up')+'" style="font-size:11px;font-family:var(--mono)">'+diffPeso+'</div>':'')
+      +(diffCintura?'<div style="font-size:10px;color:var(--muted);font-family:var(--mono)">Cin: '+diffCintura+'</div>':'')
+      +'</div></div>';
+  }).join('') : '<div style="color:var(--muted);font-size:12px;padding:10px">Sin registros aún. Registra tus medidas del primer mes.</div>';
 
   // Gráfico peso
   const chartHTML=registros.length>=2?`
@@ -1914,38 +2050,25 @@ function renderMiNutricionHTML(){
     <div class="alert alert-info">Tu entrenador aún no ha generado tu plan nutricional. Solicítalo en el gym.</div>
   </div>`;
 
-  const comidas=[
-    {icon:'🌅',nombre:'Desayuno',key:'desayuno'},
-    {icon:'🍎',nombre:'Merienda AM',key:'meriendam'},
-    {icon:'☀️',nombre:'Almuerzo',key:'almuerzo'},
-    {icon:'🍊',nombre:'Merienda PM',key:'meriendam2'},
-    {icon:'🌙',nombre:'Cena',key:'cena'},
-  ];
+  // Texto completo del plan (viene de IA)
+  const textoCompleto = plan.texto || plan.textoCompleto || '';
 
-  const macrosHTML=plan.macros?`
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px">
-      <span class="macro-pill mp-cal">🔥 ${plan.macros.calorias||'—'} kcal</span>
-      <span class="macro-pill mp-prot">💪 ${plan.macros.proteinas||'—'}g prot</span>
-      <span class="macro-pill mp-carb">⚡ ${plan.macros.carbos||'—'}g carbs</span>
-      <span class="macro-pill mp-fat">💧 ${plan.macros.grasas||'—'}g grasas</span>
-    </div>`:'';
-
-  const comidasHTML=comidas.map(cm=>`
-    <div class="nutri-meal">
-      <div class="nutri-meal-header" onclick="this.nextElementSibling.classList.toggle('open')">
-        <span class="nutri-meal-icon">${cm.icon}</span>
-        <span class="nutri-meal-name">${cm.nombre}</span>
-        <span style="margin-left:auto;color:var(--muted);font-size:12px">▼</span>
-      </div>
-      <div class="nutri-meal-body">${plan[cm.key]||'Sin especificar aún'}</div>
-    </div>`).join('');
+  const macrosHTML = plan.macros && plan.macros.calorias && plan.macros.calorias !== 'Ver plan' ? `
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+      <span class="macro-pill mp-cal">🔥 ${plan.macros.calorias} kcal</span>
+      <span class="macro-pill mp-prot">💪 ${plan.macros.proteinas}g prot</span>
+      <span class="macro-pill mp-carb">⚡ ${plan.macros.carbos}g carbs</span>
+      <span class="macro-pill mp-fat">💧 ${plan.macros.grasas}g grasas</span>
+    </div>` : '';
 
   return `<div class="card">
-    <div class="card-title">🍽 Mi Plan Nutricional <span style="font-size:10px">IA ✨</span></div>
+    <div class="card-title">🍽 Mi Plan Nutricional <span style="font-size:10px;color:var(--accent)">IA ✨</span></div>
     ${macrosHTML}
-    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Objetivo: ${plan.objetivo||'—'} · Generado: ${plan.fecha?fmtF(plan.fecha):'—'}</div>
-    ${comidasHTML}
-    ${plan.consejos?`<div class="alert alert-info" style="margin-top:8px">💡 ${plan.consejos}</div>`:''}
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px">Objetivo: <b style="color:var(--accent)">${plan.objetivo||'—'}</b> · Generado: ${plan.fecha?fmtF(plan.fecha):'—'}</div>
+    ${textoCompleto
+      ? `<div style="font-size:13px;line-height:1.8">${formatAIResponse(textoCompleto)}</div>`
+      : `<div class="alert alert-info">El plan nutricional está guardado pero no tiene contenido visible. Genera un nuevo plan desde 🎯 Mi Plan.</div>`
+    }
   </div>`;
 }
 
@@ -2279,6 +2402,793 @@ function initColorPicker(){
     if(hexEl) hexEl.textContent=color.toUpperCase();
     if(prev) prev.style.background=color;
   },100);
+}
+
+// ══════════════════════════════════════════
+//  ONBOARDING & PLAN PERSONALIZADO IA
+// ══════════════════════════════════════════
+function getOnboarding(mid){ return JSON.parse(localStorage.getItem('sg_ob_'+mid)||'null'); }
+function saveOnboarding(mid,d){ localStorage.setItem('sg_ob_'+mid,JSON.stringify(d)); }
+
+function renderMiOnboardingHTML(){
+  const m=getMiembro(); if(!m) return '<div class="alert alert-info">No hay miembro seleccionado</div>';
+  const ob=getOnboarding(m.id);
+  const prog=JSON.parse(localStorage.getItem('sg_progreso_'+m.id)||'[]');
+  if(!ob||!ob.completado){
+    return `<div class="card">
+      <div style="font-family:'Oswald',sans-serif;font-size:20px;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">🎯 Tu plan personalizado</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Completa tu perfil y la IA creará tu rutina y alimentación enfocadas en tus zonas prioritarias.</div>
+
+      <!-- DATOS BÁSICOS -->
+      <div style="font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1px;color:var(--accent);text-transform:uppercase;margin-bottom:8px">📋 Datos básicos</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div class="f-field"><label>Objetivo principal</label>
+          <select class="f-input" id="obObj">
+            <option value="perder peso y tonificar">Perder peso y tonificar</option>
+            <option value="ganar músculo">Ganar músculo</option>
+            <option value="tonificar">Tonificar general</option>
+            <option value="mejorar glúteos y piernas">Glúteos y piernas</option>
+            <option value="mejorar resistencia">Mejorar resistencia</option>
+            <option value="fuerza">Ganar fuerza</option>
+          </select>
+        </div>
+        <div class="f-field"><label>Género</label>
+          <select class="f-input" id="obGenero">
+            <option value="mujer">Mujer</option>
+            <option value="hombre">Hombre</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+        <div class="f-field"><label>Nivel de experiencia</label>
+          <select class="f-input" id="obNivel">
+            <option value="principiante">Principiante</option>
+            <option value="intermedio">Intermedio</option>
+            <option value="avanzado">Avanzado</option>
+          </select>
+        </div>
+        <div class="f-field"><label>Peso (kg)</label><input class="f-input" id="obPeso" type="number" placeholder="70"></div>
+        <div class="f-field"><label>Altura (cm)</label><input class="f-input" id="obAltura" type="number" placeholder="170"></div>
+        <div class="f-field"><label>Días disponibles/semana</label>
+          <select class="f-input" id="obDias">
+            <option value="2">2 días</option>
+            <option value="3" selected>3 días</option>
+            <option value="4">4 días</option>
+            <option value="5">5 días</option>
+          </select>
+        </div>
+        <div class="f-field"><label>Restricción alimentaria</label>
+          <select class="f-input" id="obDieta">
+            <option value="ninguna">Sin restricciones</option>
+            <option value="vegetariano">Vegetariano</option>
+            <option value="vegano">Vegano</option>
+            <option value="sin gluten">Sin gluten</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- MEDIDAS — llenadas por entrenador -->
+      <div class="alert alert-info" style="font-size:12px;margin-bottom:14px">
+        📏 <b>Tus medidas iniciales</b> serán tomadas por tu entrenador en el gym. Tú solo registrarás tu progreso mensual.
+      </div>
+
+      <!-- ZONAS PRIORITARIAS -->
+      <div style="font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1px;color:var(--accent);text-transform:uppercase;margin-bottom:8px">🎯 Zonas que quieres mejorar (elige las que apliquen)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px" id="zonasGrid">
+        ${['🍑 Glúteos','🦵 Piernas','⬛ Cintura delgada','💪 Brazos','🔝 Hombros anchos','🏋️ Espalda','🫀 Pecho','🦶 Pantorrillas'].map((z,i) =>
+          '<div onclick="toggleZona(this)" data-zona="'+z+'" style="padding:8px 10px;background:var(--s2);border:1px solid var(--border);cursor:pointer;font-size:12px;font-family:Oswald,sans-serif;letter-spacing:.5px;transition:all .15s;text-align:center">'+z+'</div>'
+        ).join('')}
+      </div>
+
+      <!-- LESIONES -->
+      <div class="f-field" style="margin-bottom:10px">
+        <label>Lesiones o limitaciones físicas</label>
+        <input class="f-input" id="obLesion" placeholder="Ej: dolor rodilla, hernia, ninguna...">
+      </div>
+      <div class="f-field" style="margin-bottom:14px">
+        <label>Meta en kg (opcional) — ¿cuánto quieres bajar o subir?</label>
+        <input class="f-input" id="obMeta" type="number" placeholder="Ej: 5">
+      </div>
+
+      <button class="btn btn-lime" id="btnGenPlan" onclick="generarPlanIA()" style="width:100%;margin-top:4px">✨ Generar mi plan personalizado</button>
+      <div class="status-bar" id="obStatus" style="margin-top:8px"></div>
+    </div>`;
+  }
+  // Plan generado
+  const diasDesde=Math.floor((new Date()-new Date(ob.fecha))/86400000);
+  const mes=Math.floor(diasDesde/30)+1;
+  const necesita=diasDesde>=28;
+  const pesoActual=prog.length?prog[prog.length-1].peso:ob.peso;
+  const cambio=(pesoActual-ob.peso).toFixed(1);
+  const pct=ob.meta?Math.min(100,Math.round(Math.abs(pesoActual-ob.peso)/ob.meta*100)):0;
+  return `
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div>
+        <div style="font-family:'Oswald',sans-serif;font-size:20px;letter-spacing:2px;text-transform:uppercase">🎯 Tu Plan — Mes ${mes}</div>
+        <div style="font-size:11px;color:var(--muted)">Objetivo: <b style="color:var(--accent)">${ob.objetivo}</b> · Inicio: ${fmtF(ob.fecha)}</div>
+      </div>
+      <button class="btn btn-outline" onclick="resetPlan(this.dataset.mid)" data-mid="${m.id}" style="font-size:11px;clip-path:none">🔄 Reiniciar</button>
+    </div>
+    ${necesita?`<div class="alert alert-warn" style="margin-top:8px">⏰ ¡Es momento de actualizar tu plan del mes ${mes}! 
+      <button class="btn-xs btn-xs-lime" onclick="actualizarPlanIA(this.dataset.mid)" data-mid="${m.id}" style="margin-left:8px">Actualizar</button></div>`:''}
+  </div>
+  <div class="card">
+    <div class="card-title">📏 Tu evolución</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="stat-card blue"><div class="stat-label">Peso inicial</div><div class="stat-val" style="font-size:20px">${ob.peso} kg</div></div>
+      <div class="stat-card ${prog.length?'green':'blue'}"><div class="stat-label">Peso actual</div><div class="stat-val" style="font-size:20px">${pesoActual} kg</div>
+        <div class="stat-sub">${cambio>0?'+':''}${cambio} kg</div></div>
+    </div>
+    ${ob.meta?`<div style="font-size:11px;color:var(--muted);margin-bottom:5px;font-family:'Oswald',sans-serif;letter-spacing:.5px">META: ${pct}% completado</div>
+    <div style="background:var(--s2);height:8px;overflow:hidden"><div style="width:${pct}%;height:100%;background:var(--accent);transition:width .5s"></div></div>`:''}
+    <button class="btn btn-lime" onclick="regPesoRapido(this.dataset.mid)" data-mid="${m.id}" style="width:100%;margin-top:12px">📊 Registrar peso hoy</button>
+  </div>
+  <div class="card">
+    <div class="card-title">💡 Consejo personalizado de hoy</div>
+    <div id="consejoBox">
+      <button class="btn btn-outline" onclick="getConsejo(this.dataset.mid)" data-mid="${m.id}" style="width:100%;clip-path:none">🤖 Ver mi consejo de hoy</button>
+    </div>
+  </div>`;
+}
+
+function toggleZona(el){
+  const activo = el.style.borderColor === 'var(--accent)' || el.dataset.sel === '1';
+  if(activo){
+    el.style.borderColor='var(--border)';
+    el.style.background='var(--s2)';
+    el.style.color='var(--text)';
+    el.dataset.sel='0';
+  } else {
+    el.style.borderColor='var(--accent)';
+    el.style.background='rgba(0,102,255,.1)';
+    el.style.color='var(--accent)';
+    el.dataset.sel='1';
+  }
+}
+
+function getZonasSeleccionadas(){
+  const zonas=[];
+  document.querySelectorAll('#zonasGrid div').forEach(el=>{
+    if(el.dataset.sel==='1') zonas.push(el.dataset.zona);
+  });
+  return zonas;
+}
+
+async function generarPlanIA(){
+  const m=getMiembro(); if(!m) return;
+  const btn=document.getElementById('btnGenPlan');
+  const st=document.getElementById('obStatus');
+  const genero=document.getElementById('obGenero')?document.getElementById('obGenero').value:'no especificado';
+  const obj=document.getElementById('obObj').value;
+  const nivel=document.getElementById('obNivel').value;
+  const peso=document.getElementById('obPeso').value||70;
+  const altura=document.getElementById('obAltura').value||170;
+  const dias=document.getElementById('obDias').value;
+  const dieta=document.getElementById('obDieta').value;
+  const lesion=document.getElementById('obLesion').value||'ninguna';
+  const meta=document.getElementById('obMeta').value||0;
+  // Medidas iniciales — leer del perfil si el entrenador ya las tomó
+  const medIni=JSON.parse(localStorage.getItem('sg_medidas_ini_'+m.id)||'{}');
+  const medidas={
+    cuello:medIni.cuello||0, pecho:medIni.pecho||0,
+    brazoD:medIni.brazoD||0, brazoI:medIni.brazoI||0,
+    cintura:medIni.cintura||0, cadera:medIni.cadera||0,
+    piernaD:medIni.piernaD||0, piernaI:medIni.piernaI||0,
+    pantorrD:medIni.pantorrD||0, pantorrI:medIni.pantorrI||0
+  };
+  const zonas=getZonasSeleccionadas();
+  const zonasStr=zonas.length>0?zonas.join(', '):'No especificadas';
+
+  btn.disabled=true; btn.innerHTML='⏳ Generando tu plan personalizado...';
+  st.className='status-bar info'; st.style.display='flex';
+  st.innerHTML='⏳ La IA está creando tu rutina y plan nutricional (20-30 segundos)...';
+
+  const KEY=(window.SIRYX_CONFIG&&window.SIRYX_CONFIG.groqKey)||cfg.groqKey||'';
+  const pRutina='Crea rutina PERSONALIZADA para '+m.nombre+'. DATOS: género '+genero+', objetivo '+obj+', nivel '+nivel+', '+dias+' días/semana, peso '+peso+'kg, altura '+altura+'cm, lesiones: '+lesion+'. ZONAS PRIORITARIAS A TRABAJAR MÁS: '+zonasStr+'. MEDIDAS CORPORALES ACTUALES: cuello '+medidas.cuello+'cm, pecho '+medidas.pecho+'cm, brazo D '+medidas.brazoD+'cm / I '+medidas.brazoI+'cm, cintura '+medidas.cintura+'cm, cadera '+medidas.cadera+'cm, pierna D '+medidas.piernaD+'cm / I '+medidas.piernaI+'cm, pantorrilla D '+medidas.pantorrD+'cm / I '+medidas.pantorrI+'cm. INSTRUCCIÓN IMPORTANTE: Si las zonas prioritarias incluyen glúteos/piernas dedica 60% de los ejercicios a esas zonas. Si incluye cintura delgada, agrega ejercicios de core y cardio HIIT. Si hay diferencia entre lado derecho e izquierdo, agrega ejercicios de compensación. Formato: **RUTINA — '+m.nombre.toUpperCase()+'** luego por días con bullets: • Ejercicio: X series x Y reps (desc: Z seg). Al final: **Progresión mes 2**.';
+  const pNutri=`Crea plan nutricional SEMANAL COMPLETO para ${m.nombre}: objetivo ${obj}, peso ${peso}kg, altura ${altura}cm, dieta ${dieta}. Menú lunes a domingo con desayuno, almuerzo, cena y meriendas. Calorías y macros diarios. Platos colombianos/latinoamericanos económicos.`;
+
+  try{
+    const [r1,r2]=await Promise.all([
+      fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+KEY},body:JSON.stringify({model:'llama-3.1-8b-instant',max_tokens:2000,temperature:.7,messages:[{role:'system',content:'Entrenador personal experto. Responde en español colombiano.'},{role:'user',content:pRutina}]})}),
+      fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+KEY},body:JSON.stringify({model:'llama-3.1-8b-instant',max_tokens:2000,temperature:.7,messages:[{role:'system',content:'Nutricionista deportivo. Responde en español colombiano.'},{role:'user',content:pNutri}]})})
+    ]);
+    const d1=await r1.json(); const d2=await r2.json();
+    const tRutina=d1.choices?.[0]?.message?.content||'';
+    const tNutri=d2.choices?.[0]?.message?.content||'';
+
+    const ob={completado:true,miembroId:m.id,nombre:m.nombre,genero,objetivo:obj,nivel,peso:parseFloat(peso),altura:parseFloat(altura),medidas,zonas,dias,dieta,lesion,meta:meta?parseFloat(meta):null,fecha:hoy(),mes:1,rutinaTexto:tRutina,nutriTexto:tNutri};
+    saveOnboarding(m.id,ob);
+
+    // Guardar rutina
+    const ejs=[];
+    tRutina.split('\n').forEach(l=>{const mx=l.match(/[•\-\*]\s*([^:]+):\s*(\d+)\s*series?\s*[x×]\s*(\d+)/i);if(mx)ejs.push({nombre:mx[1].trim(),series:mx[2],reps:mx[3],peso:'—'});});
+    rutinas=rutinas.filter(r=>r.miembroId!==m.id||!r.esPersonalizado);
+    rutinas.push({id:'r'+Date.now(),nombre:'Plan '+obj+' — '+m.nombre+' (Mes 1)',miembroId:m.id,ejercicios:ejs,textoCompleto:tRutina,esPersonalizado:true,creadoEl:new Date().toISOString()});
+    save();
+
+    // Guardar nutrición
+    localStorage.setItem('sg_nutri_'+m.id,JSON.stringify({texto:tNutri,objetivo:obj,macros:{calorias:'Ver plan',proteinas:'Ver plan',carbos:'Ver plan',grasas:'Ver plan'},fecha:hoy()}));
+
+    // Guardar medidas iniciales
+    const pk='sg_progreso_'+m.id;
+    const pg=JSON.parse(localStorage.getItem(pk)||'[]');
+    if(!pg.length) pg.push({fecha:hoy(),peso:parseFloat(peso),...Object.fromEntries(Object.entries(medidas).map(([k,v])=>[k,parseFloat(v)||0])),nota:'Medidas iniciales'});
+    localStorage.setItem(pk,JSON.stringify(pg));
+
+    st.className='status-bar ok'; st.innerHTML='✅ ¡Tu plan personalizado está listo!';
+    setTimeout(()=>renderTab('mionboarding'),1200);
+  }catch(e){
+    st.className='status-bar err'; st.innerHTML='❌ Error al generar. Verifica tu conexión e intenta de nuevo.';
+    console.error(e);
+  }
+  btn.disabled=false; btn.innerHTML='✨ Generar mi plan';
+}
+
+function resetPlan(mid){
+  if(!confirm('¿Reiniciar tu plan? Se borrará el plan actual pero conservas tu historial.')) return;
+  localStorage.removeItem('sg_ob_'+mid);
+  renderTab('mionboarding');
+}
+
+async function actualizarPlanIA(mid){
+  const ob=getOnboarding(mid); if(!ob) return;
+  const m=miembros.find(m=>m.id===mid); if(!m) return;
+  const prog=JSON.parse(localStorage.getItem('sg_progreso_'+mid)||'[]');
+  const asistM=asistencia.filter(a=>a.miembroId===mid);
+  const visitas=asistM.filter(a=>(new Date()-new Date(a.fecha))<30*86400000).length;
+  const pesoActual=prog.length?prog[prog.length-1].peso:ob.peso;
+  const KEY=(window.SIRYX_CONFIG&&window.SIRYX_CONFIG.groqKey)||cfg.groqKey||'';
+  toast('⏳ Actualizando tu plan...');
+  const p=`Actualiza rutina mes ${(ob.mes||1)+1} para ${m.nombre}. Objetivo: ${ob.objetivo}. Peso inicial: ${ob.peso}kg → actual: ${pesoActual}kg. Visitas último mes: ${visitas} de ${ob.dias} planeados. Lesiones: ${ob.lesion||'ninguna'}. Rutina anterior (resumen): ${ob.rutinaTexto?.slice(0,400)||''}. Genera rutina actualizada: si visitó menos de ${Math.round(ob.dias*0.7)} días mantén dificultad; si visitó ${ob.dias}+ días sube pesos 5-10% y añade ejercicios. Incluye mensaje motivacional personalizado al inicio.`;
+  try{
+    const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+KEY},body:JSON.stringify({model:'llama-3.1-8b-instant',max_tokens:2000,temperature:.7,messages:[{role:'system',content:'Entrenador personal experto. Español colombiano.'},{role:'user',content:p}]})});
+    const d=await r.json();
+    const texto=d.choices?.[0]?.message?.content||'';
+    ob.rutinaTexto=texto; ob.mes=(ob.mes||1)+1; ob.fecha=hoy();
+    saveOnboarding(mid,ob);
+    const ejs=[];
+    texto.split('\n').forEach(l=>{const mx=l.match(/[•\-\*]\s*([^:]+):\s*(\d+)\s*series?\s*[x×]\s*(\d+)/i);if(mx)ejs.push({nombre:mx[1].trim(),series:mx[2],reps:mx[3],peso:'—'});});
+    rutinas=rutinas.filter(r=>r.miembroId!==mid||!r.esPersonalizado);
+    rutinas.push({id:'r'+Date.now(),nombre:'Plan '+ob.objetivo+' — '+m.nombre+' (Mes '+ob.mes+')',miembroId:mid,ejercicios:ejs,textoCompleto:texto,esPersonalizado:true,creadoEl:new Date().toISOString()});
+    save();
+    toast('✅ Plan del mes '+ob.mes+' generado');
+    renderTab('mionboarding');
+  }catch(e){toast('❌ Error al actualizar.');}
+}
+
+function regPesoRapido(mid){
+  const p=prompt('Ingresa tu peso actual (kg):');
+  if(!p||isNaN(p)) return;
+  const k='sg_progreso_'+mid;
+  const pg=JSON.parse(localStorage.getItem(k)||'[]');
+  pg.push({fecha:hoy(),peso:parseFloat(p),nota:'Registro rápido'});
+  localStorage.setItem(k,JSON.stringify(pg));
+  verificarLogros(mid);
+  toast('✅ Peso registrado: '+p+' kg');
+  renderTab('mionboarding');
+}
+
+async function getConsejo(mid){
+  const ob=getOnboarding(mid);
+  const m=miembros.find(m=>m.id===mid); if(!m) return;
+  const asistM=asistencia.filter(a=>a.miembroId===mid);
+  const visS=asistM.filter(a=>(new Date()-new Date(a.fecha))<7*86400000).length;
+  const visM=asistM.filter(a=>(new Date()-new Date(a.fecha))<30*86400000).length;
+  const prog=JSON.parse(localStorage.getItem('sg_progreso_'+mid)||'[]');
+  const pesoActual=prog.length?prog[prog.length-1].peso:ob?.peso||70;
+  const cambio=ob?(pesoActual-ob.peso).toFixed(1):0;
+  const box=document.getElementById('consejoBox');
+  box.innerHTML='<div style="color:var(--muted);font-size:12px;padding:10px">⏳ Analizando tu progreso...</div>';
+  const KEY=(window.SIRYX_CONFIG&&window.SIRYX_CONFIG.groqKey)||cfg.groqKey||'';
+  const p=`Eres el coach personal de ${m.nombre}. Da un consejo motivador basado en: objetivo ${ob?.objetivo||'mejorar'}, visitas esta semana: ${visS} de ${ob?.dias||3} planeados, visitas este mes: ${visM}, cambio de peso: ${cambio>0?'+':''}${cambio}kg. Habla directo a ${m.nombre} en tono cercano colombiano. Máximo 3 párrafos. Si no ha ido suficiente, dile cuánto más puede lograr si viene más.`;
+  try{
+    const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+KEY},body:JSON.stringify({model:'llama-3.1-8b-instant',max_tokens:500,temperature:.8,messages:[{role:'system',content:'Coach de gym motivador. Español colombiano.'},{role:'user',content:p}]})});
+    const d=await r.json();
+    const consejo=d.choices?.[0]?.message?.content||'';
+    box.innerHTML='<div style="font-size:13px;line-height:1.8">'+formatAIResponse(consejo)+'</div><button class="btn btn-outline" onclick="getConsejo(this.dataset.mid)" data-mid="'+mid+'" style="width:100%;margin-top:10px;clip-path:none;font-size:11px">🔄 Nuevo consejo</button>';
+  }catch(e){box.innerHTML='<div class="alert alert-red">❌ Error al obtener consejo</div>';}
+}
+
+// ══ MI COACH — Plato del día y plan semanal ══
+function renderMiCoachHTML(){
+  const m=getMiembro(); if(!m) return '';
+  const ob=getOnboarding(m.id);
+  const nutri=JSON.parse(localStorage.getItem('sg_nutri_'+m.id)||'null');
+  const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const hoyDia=dias[new Date().getDay()];
+  if(!ob||!ob.completado) return '<div class="card"><div class="card-title">🍽 Mi Nutrición</div><div class="alert alert-info">Primero completa tu plan en 🎯 Mi Plan</div></div>';
+  let html = '<div class="card"><div class="card-title">🍳 Plato especial — '+hoyDia+'</div><div id="platoBox"><button class="btn btn-lime" onclick="sugerirPlato(this.dataset.mid)" data-mid="'+m.id+'" style="width:100%">🤖 Sugerir plato diferente para hoy</button></div></div>';
+  if(nutri){
+    const textoNutri = nutri.texto||nutri.textoCompleto||'';
+    html += '<div class="card"><div class="card-title">📅 Mi plan nutricional semanal</div><div style="font-size:13px;line-height:1.8">'+formatAIResponse(textoNutri)+'</div></div>';
+  }
+  return html;
+}
+
+
+async function sugerirPlato(mid){
+  const ob=getOnboarding(mid);
+  const box=document.getElementById('platoBox');
+  const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const hoyDia=dias[new Date().getDay()];
+  box.innerHTML='<div style="color:var(--muted);font-size:12px;padding:10px">⏳ Buscando plato...</div>';
+  const KEY=(window.SIRYX_CONFIG&&window.SIRYX_CONFIG.groqKey)||cfg.groqKey||'';
+  const p=`Sugiere UN plato diferente y delicioso para hoy ${hoyDia} para alguien con objetivo ${ob?.objetivo||'fitness'} y dieta ${ob?.dieta||'sin restricciones'}. Usa ingredientes colombianos/latinoamericanos económicos. Incluye: nombre, ingredientes, preparación en 3 pasos, calorías aproximadas y por qué es bueno para su objetivo.`;
+  try{
+    const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+KEY},body:JSON.stringify({model:'llama-3.1-8b-instant',max_tokens:600,temperature:.9,messages:[{role:'system',content:'Chef nutricionista colombiano.'},{role:'user',content:p}]})});
+    const d=await r.json();
+    const plato=d.choices?.[0]?.message?.content||'';
+    box.innerHTML='<div style="font-size:13px;line-height:1.8">'+formatAIResponse(plato)+'</div><button class="btn btn-outline" onclick="sugerirPlato(this.dataset.mid)" data-mid="'+mid+'" style="width:100%;margin-top:10px;clip-path:none;font-size:11px">🔄 Otro plato</button>';
+  }catch(e){box.innerHTML='<div class="alert alert-red">❌ Error. Intenta de nuevo.</div>';}
+}
+
+
+// ══════════════════════════════════════════
+//  PANEL DE AUSENCIAS CON MENSAJE WA
+// ══════════════════════════════════════════
+function renderAusenciasHTML(){
+  const hoyStr=hoy();
+  const presentesHoy=new Set(asistencia.filter(a=>a.fecha===hoyStr).map(a=>a.miembroId));
+  const activos=miembros.filter(m=>m.activo&&statusMiembro(m).cls!=='badge-frozen'&&statusMiembro(m).cls!=='badge-exp');
+  const ausentes=activos.filter(m=>!presentesHoy.has(m.id));
+
+  if(!ausentes.length) return '<div class="alert alert-ok">✅ ¡Todos los miembros activos han asistido hoy!</div>';
+
+  return ausentes.map(m=>{
+    const tel=(m.tel||'').replace(/\D/g,'');
+    const tieneTel=tel.length>=10;
+    return '<div class="membre-row" style="background:var(--s2);border:1px solid var(--border);border-left:3px solid var(--orange);border-radius:0;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:6px">'
+      +'<div style="width:36px;height:36px;background:rgba(255,140,0,.15);border-radius:0;display:flex;align-items:center;justify-content:center;font-family:Oswald,sans-serif;font-size:16px;color:var(--orange);flex-shrink:0">'+initiales(m.nombre)+'</div>'
+      +'<div style="flex:1;min-width:0">'
+        +'<div style="font-size:13px;font-weight:600">'+m.nombre+'</div>'
+        +'<div style="font-size:11px;color:var(--muted);font-family:var(--mono)">'+(m.tel||'Sin teléfono')+' · '+(m.plan||'Sin plan').toUpperCase()+'</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:6px;flex-shrink:0">'
+        +(tieneTel
+          ?'<button class="btn-xs btn-xs-lime" data-mid="'+m.id+'" data-nombre="'+m.nombre+'" data-tel="'+tel+'" onclick="enviarMotiWA(this.dataset.mid,this.dataset.nombre,this.dataset.tel)">📱 WA</button>'
+          :'<span style="font-size:10px;color:var(--muted)">Sin tel</span>')
+        +'<button class="btn-xs btn-xs-outline" data-mid="'+m.id+'" data-nombre="'+m.nombre+'" data-tel="'+tel+'" onclick="generarMotiIA(this.dataset.mid,this.dataset.nombre,this.dataset.tel)">🤖 IA</button>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+async function generarMotiIA(mid, nombre, tel){
+  const m=miembros.find(m=>m.id===mid);
+  const asistM=asistencia.filter(a=>a.miembroId===mid);
+  const ultimaVisita=asistM.length?asistM[asistM.length-1].fecha:'nunca';
+  const diasSinVenir=ultimaVisita==='nunca'?'mucho tiempo':Math.floor((new Date()-new Date(ultimaVisita))/86400000)+' días';
+  const ob=getOnboarding(mid);
+  const objetivo=ob?.objetivo||m?.objetivo||'mejorar';
+  const genero=ob?.genero||m?.genero||'';
+  const KEY=(window.SIRYX_CONFIG&&window.SIRYX_CONFIG.groqKey)||cfg.groqKey||'';
+  const btn=event.target;
+  btn.textContent='⏳';btn.disabled=true;
+  try{
+    const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+KEY},
+      body:JSON.stringify({model:'llama-3.1-8b-instant',max_tokens:150,temperature:.9,
+        messages:[
+          {role:'system',content:'Eres un coach de gym motivador. Escribe mensajes cortos y cálidos en español colombiano. MÁXIMO 3 líneas.'},
+          {role:'user',content:'Escribe un mensaje motivacional muy corto para '+nombre+' que lleva '+diasSinVenir+' sin venir al gym. Objetivo del cliente: '+objetivo+'. INSTRUCCIONES: El mensaje debe sonar como un amigo cercano que genuinamente se preocupa, no como publicidad. Máximo 3 líneas. Empieza con su nombre. Tono cálido, personal y auténtico. Varía completamente el mensaje cada vez — no uses siempre las mismas frases. Puedes mencionar su objetivo, lo que está logrando, lo bien que se va a sentir, lo que lo espera en el gym. Sin emojis excesivos.'}
+        ]})
+    });
+    const d=await r.json();
+    const msg=d.choices?.[0]?.message?.content||'Hola '+nombre+', te esperamos en el gym!';
+    const container=btn.closest('div');
+    const msgDiv=document.createElement('div');
+    msgDiv.style.cssText='margin-top:8px;padding:10px;background:var(--s1);border:1px solid var(--border);border-left:2px solid var(--accent);font-size:12px;line-height:1.6';
+    const msgP=document.createElement('div');
+    msgP.innerHTML=msg.replace(/\n/g,'<br>');
+    msgDiv.appendChild(msgP);
+    const btnRow=document.createElement('div');
+    btnRow.style.cssText='display:flex;gap:6px;margin-top:8px';
+    if(tel){
+      const btnWA=document.createElement('button');
+      btnWA.className='btn-xs btn-xs-lime';
+      btnWA.textContent='📱 Enviar por WhatsApp';
+      btnWA.onclick=function(){ window.open('https://wa.me/57'+tel.replace(/\D/g,'')+'?text='+encodeURIComponent(msgP.innerText.trim()),'_blank'); };
+      btnRow.appendChild(btnWA);
+    }
+    const btnClose=document.createElement('button');
+    btnClose.className='btn-xs btn-xs-outline';
+    btnClose.textContent='✕ Cerrar';
+    btnClose.onclick=function(){ msgDiv.remove(); };
+    btnRow.appendChild(btnClose);
+    msgDiv.appendChild(btnRow);
+    if(container) container.parentElement.appendChild(msgDiv);
+  }catch(e){ toast('❌ Error al generar mensaje'); }
+  btn.textContent='🤖 IA';btn.disabled=false;
+}
+
+
+function enviarMotiWA(mid, nombre, tel){
+  const msg='Hola '+nombre+'! 💪 Te esperamos hoy en el gym. Cada entrenamiento cuenta para lograr tu objetivo. ¡Vamos que tú puedes!';
+  const url='https://wa.me/57'+tel+'?text='+encodeURIComponent(msg);
+  window.open(url,'_blank');
+}
+
+function enviarWATexto(tel, msg){
+  const url='https://wa.me/57'+tel.replace(/\D/g,'')+'?text='+encodeURIComponent(msg.trim());
+  window.open(url,'_blank');
+}
+function enviarWADirecto(tel, msg){
+  const clean=msg.replace(/<[^>]+>/g,'').trim();
+  const url='https://wa.me/57'+tel+'?text='+encodeURIComponent(clean);
+  window.open(url,'_blank');
+}
+
+
+// ══ CAMBIO DE RUTINA POR ADMIN/ENTRENADOR ══
+function abrirCambioRutina(mid, nombre){
+  document.getElementById('cambioRutinaMid').value=mid;
+  document.getElementById('cambioRutinaNombre').textContent=nombre;
+  // Precargar datos del onboarding si existen
+  const ob=getOnboarding(mid);
+  if(ob){
+    document.getElementById('crObjetivo').value=ob.objetivo||'tonificar general';
+    document.getElementById('crNivel').value=ob.nivel||'principiante';
+    document.getElementById('crDias').value=ob.dias||'3';
+    document.getElementById('crLesion').value=ob.lesion||'';
+  }
+  // Reset zonas
+  document.querySelectorAll('#crZonasGrid div').forEach(el=>{
+    el.style.borderColor='var(--border)';
+    el.style.background='var(--s2)';
+    el.style.color='var(--text)';
+    el.dataset.sel='0';
+  });
+  document.getElementById('crStatus').style.display='none';
+  document.getElementById('modalCambioRutina').classList.add('open');
+}
+
+async function generarNuevaRutinaAdmin(){
+  const mid=document.getElementById('cambioRutinaMid').value;
+  const m=miembros.find(m=>m.id===mid); if(!m) return;
+  const objetivo=document.getElementById('crObjetivo').value;
+  const nivel=document.getElementById('crNivel').value;
+  const dias=document.getElementById('crDias').value;
+  const lesion=document.getElementById('crLesion').value||'ninguna';
+  const zonas=[];
+  document.querySelectorAll('#crZonasGrid div').forEach(el=>{ if(el.dataset.sel==='1') zonas.push(el.dataset.zona); });
+  const zonasStr=zonas.length>0?zonas.join(', '):'No especificadas';
+  const medIni=JSON.parse(localStorage.getItem('sg_medidas_ini_'+mid)||'{}');
+  const ob=getOnboarding(mid)||{};
+  const peso=medIni.peso||ob.peso||70;
+  const altura=medIni.altura||ob.altura||170;
+  const KEY=(window.SIRYX_CONFIG&&window.SIRYX_CONFIG.groqKey)||cfg.groqKey||'';
+
+  const st=document.getElementById('crStatus');
+  st.className='status-bar info'; st.style.display='flex';
+  st.innerHTML='⏳ Generando nueva rutina personalizada...';
+  const btn=document.querySelector('#modalCambioRutina .btn-lime');
+  if(btn){btn.disabled=true;btn.innerHTML='⏳ Generando...';}
+
+  const prompt='Crea rutina PERSONALIZADA para '+m.nombre+'. DATOS: objetivo '+objetivo+', nivel '+nivel+', '+dias+' días/semana, peso '+peso+'kg, altura '+altura+'cm, lesiones: '+lesion+'. ZONAS PRIORITARIAS: '+zonasStr+'. Si incluye glúteos/piernas dedica 60% a esas zonas. Si incluye cintura agrega core y HIIT. Formato: **RUTINA — '+m.nombre.toUpperCase()+'** luego por días con bullets: • Ejercicio: X series x Y reps (desc: Z seg). Al final progresión mes 2.';
+
+  try{
+    const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+KEY},
+      body:JSON.stringify({model:'llama-3.1-8b-instant',max_tokens:2000,temperature:.7,
+        messages:[{role:'system',content:'Entrenador personal experto. Español colombiano.'},{role:'user',content:prompt}]})
+    });
+    const d=await r.json();
+    const texto=d.choices?.[0]?.message?.content||'';
+    // Guardar rutina
+    const ejs=[];
+    texto.split('\n').forEach(l=>{
+      const mx=l.match(/[•\-\*]\s*([^:]+):\s*(\d+)\s*series?\s*[x×]\s*(\d+)/i);
+      if(mx) ejs.push({nombre:mx[1].trim(),series:mx[2],reps:mx[3],peso:'—'});
+    });
+    rutinas=rutinas.filter(r=>r.miembroId!==mid||!r.esPersonalizado);
+    rutinas.push({id:'r'+Date.now(),nombre:objetivo+' — '+m.nombre,miembroId:mid,ejercicios:ejs,textoCompleto:texto,esPersonalizado:true,creadoEl:new Date().toISOString()});
+    // Actualizar onboarding
+    const obAct=getOnboarding(mid)||{completado:true,miembroId:mid,nombre:m.nombre,fecha:hoy(),mes:1};
+    obAct.objetivo=objetivo; obAct.nivel=nivel; obAct.dias=dias; obAct.lesion=lesion;
+    obAct.zonas=zonas; obAct.rutinaTexto=texto;
+    saveOnboarding(mid,obAct);
+    save();
+    st.className='status-bar ok'; st.innerHTML='✅ Nueva rutina generada y asignada a '+m.nombre;
+    if(btn){btn.disabled=false;btn.innerHTML='✨ Generar nueva rutina';}
+    setTimeout(()=>{ document.getElementById('modalCambioRutina').classList.remove('open'); renderTab('miembros'); },1500);
+    toast('✅ Rutina actualizada para '+m.nombre);
+  }catch(e){
+    st.className='status-bar err'; st.innerHTML='❌ Error al generar. Verifica la conexión.';
+    if(btn){btn.disabled=false;btn.innerHTML='✨ Generar nueva rutina';}
+  }
+}
+
+
+function abrirMedidas(mid, nombre){
+  document.getElementById('medidasMiembroId').value=mid;
+  document.getElementById('medidasNombreLabel').textContent=nombre;
+  // Cargar medidas existentes si las hay
+  const med=JSON.parse(localStorage.getItem('sg_medidas_ini_'+mid)||'{}');
+  const campos={mdiPeso:'peso',mdiAltura:'altura',mdiCuello:'cuello',mdiPecho:'pecho',
+    mdiBrazoD:'brazoD',mdiBrazoI:'brazoI',mdiCintura:'cintura',mdiCadera:'cadera',
+    mdiPiernaD:'piernaD',mdiPiernaI:'piernaI',mdiPantorrD:'pantorrD',mdiPantorrI:'pantorrI'};
+  Object.entries(campos).forEach(([id,key])=>{
+    const el=document.getElementById(id);
+    if(el) el.value=med[key]||'';
+  });
+  document.getElementById('modalMedidas').classList.add('open');
+}
+
+function guardarMedidasIni(){
+  const mid=document.getElementById('medidasMiembroId').value;
+  const med={
+    peso:parseFloat(document.getElementById('mdiPeso').value)||0,
+    altura:parseFloat(document.getElementById('mdiAltura').value)||0,
+    cuello:parseFloat(document.getElementById('mdiCuello').value)||0,
+    pecho:parseFloat(document.getElementById('mdiPecho').value)||0,
+    brazoD:parseFloat(document.getElementById('mdiBrazoD').value)||0,
+    brazoI:parseFloat(document.getElementById('mdiBrazoI').value)||0,
+    cintura:parseFloat(document.getElementById('mdiCintura').value)||0,
+    cadera:parseFloat(document.getElementById('mdiCadera').value)||0,
+    piernaD:parseFloat(document.getElementById('mdiPiernaD').value)||0,
+    piernaI:parseFloat(document.getElementById('mdiPiernaI').value)||0,
+    pantorrD:parseFloat(document.getElementById('mdiPantorrD').value)||0,
+    pantorrI:parseFloat(document.getElementById('mdiPantorrI').value)||0,
+    fecha:hoy()
+  };
+  localStorage.setItem('sg_medidas_ini_'+mid, JSON.stringify(med));
+  // También guardar en el historial de progreso si está vacío
+  const pk='sg_progreso_'+mid;
+  const pg=JSON.parse(localStorage.getItem(pk)||'[]');
+  if(!pg.length){
+    pg.push({fecha:hoy(),peso:med.peso,cuello:med.cuello,pecho:med.pecho,
+      brazoD:med.brazoD,brazoI:med.brazoI,cintura:med.cintura,cadera:med.cadera,
+      piernaD:med.piernaD,piernaI:med.piernaI,pantorrD:med.pantorrD,pantorrI:med.pantorrI,
+      nota:'Medidas iniciales tomadas por entrenador'});
+    localStorage.setItem(pk,JSON.stringify(pg));
+  }
+  document.getElementById('modalMedidas').classList.remove('open');
+  toast('✅ Medidas iniciales guardadas');
+}
+
+// ══════════════════════════════════════════
+//  TIENDA
+// ══════════════════════════════════════════
+function getTienda(){ return JSON.parse(localStorage.getItem('sg_tienda')||'[]'); }
+function saveTienda(p){ localStorage.setItem('sg_tienda',JSON.stringify(p)); }
+function getCarrito(mid){ return JSON.parse(localStorage.getItem('sg_carrito_'+mid)||'[]'); }
+function saveCarrito(mid,c){ localStorage.setItem('sg_carrito_'+mid,JSON.stringify(c)); }
+
+// ── VISTA ADMIN ──
+function renderTiendaAdminHTML(){
+  const productos=getTienda();
+  return '<div style="display:flex;justify-content:flex-end;margin-bottom:10px">'
+    +'<button class="btn btn-lime" onclick="abrirModalProducto()">+ Agregar producto</button>'
+    +'</div>'
+    +(productos.length?
+      '<div class="productos-grid">'+productos.map((p,i)=>
+        '<div class="producto-card">'
+        +(p.foto?'<div class="producto-img" style="padding:0"><img src="'+p.foto+'" style="width:100%;height:100%;object-fit:cover;display:block"></div>':'<div class="producto-img">'+(p.emoji||'🛒')+'</div>')
+        +'<div class="producto-body">'
+        +(p.promo?'<div class="producto-promo">🔥 '+p.promo+'</div>':'')
+        +'<div class="producto-nombre">'+p.nombre+'</div>'
+        +(p.descripcion?'<div style="font-size:11px;color:var(--muted);line-height:1.4">'+p.descripcion+'</div>':'')
+        +(p.precioAntes?'<div class="producto-precio-antes">$'+fmt(p.precioAntes)+'</div>':'')
+        +'<div class="producto-precio">$'+fmt(p.precio)+'</div>'
+        +'<div style="display:flex;gap:6px;margin-top:8px">'
+        +'<button class="btn-xs btn-xs-outline" onclick="editarProducto('+i+')">✏ Editar</button>'
+        +'<button class="btn-xs btn-xs-red" onclick="eliminarProducto('+i+')">🗑</button>'
+        +'</div>'
+        +'</div></div>'
+      ).join('')+'</div>'
+      :'<div class="alert alert-info">No hay productos aún. Agrega el primer producto.</div>');
+}
+
+function abrirModalProducto(idx){
+  const productos=getTienda();
+  const p=idx!==undefined?productos[idx]:{};
+  const closeBtn='document.getElementById(\"modalProd\").remove()';
+  const html='<div class="modal-overlay open" id="modalProd" style="z-index:600">'
+    +'<div class="modal" style="max-width:400px">'
+    +'<div class="modal-title">'+(idx!==undefined?'✏ Editar':'+ Nuevo')+' producto'
+    +'<button class="modal-close" onclick="'+closeBtn+'">✕</button></div>'
+    +'<div class="f-field"><label>Foto del producto (opcional)</label>'
+    +'<div style="display:flex;gap:10px;align-items:center">'
+    +'<div id="fotoPreviewWrap" onclick="document.getElementById(\'fotoFileInput\').click()" style="width:70px;height:70px;background:var(--s2);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;flex-shrink:0;font-size:28px">'
+    +(p.foto?'<img src="'+p.foto+'" style="width:100%;height:100%;object-fit:cover">':'<span>'+(p.emoji||'📷')+'</span>')
+    +'</div>'
+    +'<div style="flex:1;font-size:11px;color:var(--muted);line-height:1.6">Toca para subir foto.<br>Si no subes foto usa un emoji.</div>'
+    +'</div>'
+    +'<input type="file" id="fotoFileInput" accept="image/*" style="display:none" onchange="previsualizarFoto(event)">'
+    +'</div>'
+    +'<div class="f-field"><label>Emoji (si no hay foto)</label><input class="f-input" id="pEmoji" placeholder="🥤" value="'+(p.emoji||'')+'"></div>'
+    +'<div class="f-field"><label>Nombre del producto</label><input class="f-input" id="pNombre" placeholder="Proteína Whey" value="'+(p.nombre||'')+'"></div>'
+    +'<div class="f-field"><label>Descripción corta</label>'
+    +'<div style="display:flex;gap:6px">'
+    +'<input class="f-input" id="pDesc" placeholder="30 porciones, sabor chocolate" value="'+(p.descripcion||'')+'" style="flex:1">'
+    +'<button class="btn-xs btn-xs-lime" onclick="generarDescProducto()" style="white-space:nowrap;flex-shrink:0">🤖 IA</button>'
+    +'</div></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+    +'<div class="f-field"><label>Precio actual ($)</label><input class="f-input" id="pPrecio" type="number" placeholder="85000" value="'+(p.precio||'')+'"></div>'
+    +'<div class="f-field"><label>Precio antes ($) — opcional</label><input class="f-input" id="pAntes" type="number" placeholder="100000" value="'+(p.precioAntes||'')+'"></div>'
+    +'</div>'
+    +'<div class="f-field"><label>Promoción del mes — opcional</label><input class="f-input" id="pPromo" placeholder="Ej: 2x1, 20% OFF, Solo este mes" value="'+(p.promo||'')+'"></div>'
+    +'<div class="f-field"><label>Stock disponible (0 = ilimitado)</label><input class="f-input" id="pStock" type="number" placeholder="0" value="'+(p.stock||0)+'"></div>'
+    +'<div class="modal-row">'
+    +'<button class="btn btn-outline" onclick="'+closeBtn+'">Cancelar</button>'
+    +'<button class="btn btn-lime" onclick="guardarProducto('+(idx!==undefined?idx:'undefined')+')">💾 Guardar</button>'
+    +'</div></div></div>';
+  document.body.insertAdjacentHTML('beforeend',html);
+}
+
+function guardarProducto(idx){
+  const nombre=document.getElementById('pNombre').value.trim();
+  const precio=parseFloat(document.getElementById('pPrecio').value)||0;
+  if(!nombre||!precio){toast('❌ Nombre y precio son obligatorios');return;}
+  const productos=getTienda();
+  const fotoEl=document.getElementById('fotoPreviewWrap');
+  const fotoImg=fotoEl?.querySelector('img');
+  const fotoBase64=fotoImg?fotoImg.src:'';
+  const prod={
+    nombre,
+    foto:fotoBase64||'',
+    emoji:document.getElementById('pEmoji').value.trim()||'🛒',
+    descripcion:document.getElementById('pDesc').value.trim(),
+    precio,
+    precioAntes:parseFloat(document.getElementById('pAntes').value)||0,
+    promo:document.getElementById('pPromo').value.trim(),
+    stock:parseInt(document.getElementById('pStock').value)||0,
+    id:'p'+Date.now()
+  };
+  if(idx!==undefined&&idx!=='undefined') productos[idx]=prod;
+  else productos.push(prod);
+  saveTienda(productos);
+  document.getElementById('modalProd').remove();
+  renderTab('tienda');
+  toast('✅ Producto guardado');
+}
+
+function editarProducto(i){ abrirModalProducto(i); }
+function eliminarProducto(i){
+  if(!confirm('¿Eliminar este producto?')) return;
+  const p=getTienda(); p.splice(i,1); saveTienda(p);
+  renderTab('tienda'); toast('✅ Producto eliminado');
+}
+
+// ── VISTA CLIENTE ──
+function renderMiTiendaHTML(){
+  const m=getMiembro(); if(!m) return '';
+  const productos=getTienda();
+  const carrito=getCarrito(m.id);
+  const totalItems=carrito.reduce((a,i)=>a+i.qty,0);
+  const totalPrecio=carrito.reduce((a,i)=>a+i.precio*i.qty,0);
+
+  if(!productos.length) return '<div class="card"><div class="card-title">🛍️ Tienda</div><div class="alert alert-info">La tienda no tiene productos aún.</div></div>';
+
+  const grid='<div class="productos-grid">'+productos.map(p=>{
+    const enCarrito=carrito.find(ci=>ci.id===p.id);
+    const descuento=p.precioAntes?Math.round((1-p.precio/p.precioAntes)*100):0;
+    let html='<div class="producto-card">';
+    html+=(p.foto?'<div class="producto-img" style="padding:0"><img src="'+p.foto+'" style="width:100%;height:100%;object-fit:cover;display:block"></div>':'<div class="producto-img">'+(p.emoji||'🛒')+'</div>');
+    html+='<div class="producto-body">';
+    if(p.promo) html+='<div class="producto-promo">🔥 '+p.promo+'</div>';
+    if(descuento>0) html+='<div class="producto-promo" style="background:var(--accent)">-'+descuento+'%</div>';
+    html+='<div class="producto-nombre">'+p.nombre+'</div>';
+    if(p.descripcion) html+='<div style="font-size:11px;color:var(--muted);line-height:1.4;margin-bottom:4px">'+p.descripcion+'</div>';
+    if(p.precioAntes) html+='<div class="producto-precio-antes">$'+fmt(p.precioAntes)+'</div>';
+    html+='<div class="producto-precio">$'+fmt(p.precio)+'</div>';
+    if(enCarrito){
+      html+='<div class="carrito-qty" style="margin-top:8px">';
+      html+='<button class="qty-btn" data-mid="'+m.id+'" data-pid="'+p.id+'" data-delta="-1" onclick="cambiarQty(this.dataset.mid,this.dataset.pid,-1)">−</button>';
+      html+='<span style="font-family:var(--mono);font-size:14px;font-weight:700;min-width:24px;text-align:center">'+enCarrito.qty+'</span>';
+      html+='<button class="qty-btn" data-mid="'+m.id+'" data-pid="'+p.id+'" data-delta="1" onclick="cambiarQty(this.dataset.mid,this.dataset.pid,1)">+</button>';
+      html+='</div>';
+    } else {
+      html+='<button class="btn btn-lime" data-mid="'+m.id+'" data-pid="'+p.id+'" data-nombre="'+p.nombre+'" data-precio="'+p.precio+'" onclick="agregarCarrito(this.dataset.mid,this.dataset.pid,this.dataset.nombre,parseFloat(this.dataset.precio))" style="width:100%;margin-top:8px;font-size:12px">+ Agregar</button>';
+    }
+    html+='</div></div>';
+    return html;
+  }).join('')+'</div>';
+
+  let carritoHTML='';
+  if(carrito.length){
+    carritoHTML='<div class="card" style="border-left:3px solid var(--accent)">';
+    carritoHTML+='<div class="card-title">🛒 Mi carrito ('+totalItems+' items)</div>';
+    carrito.forEach(item=>{
+      carritoHTML+='<div class="carrito-item">';
+      carritoHTML+='<div style="flex:1"><div style="font-size:13px;font-weight:600">'+item.nombre+'</div>';
+      carritoHTML+='<div style="font-size:11px;color:var(--muted);font-family:var(--mono)">$'+fmt(item.precio)+' c/u</div></div>';
+      carritoHTML+='<div class="carrito-qty">';
+      carritoHTML+='<button class="qty-btn" data-mid="'+m.id+'" data-pid="'+item.id+'" onclick="cambiarQty(this.dataset.mid,this.dataset.pid,-1)">−</button>';
+      carritoHTML+='<span style="font-family:var(--mono);font-size:14px;font-weight:700;min-width:20px;text-align:center">'+item.qty+'</span>';
+      carritoHTML+='<button class="qty-btn" data-mid="'+m.id+'" data-pid="'+item.id+'" onclick="cambiarQty(this.dataset.mid,this.dataset.pid,1)">+</button>';
+      carritoHTML+='</div>';
+      carritoHTML+='<div style="font-family:var(--mono);font-size:13px;font-weight:700;min-width:60px;text-align:right">$'+fmt(item.precio*item.qty)+'</div>';
+      carritoHTML+='</div>';
+    });
+    carritoHTML+='<div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;display:flex;align-items:center;justify-content:space-between">';
+    carritoHTML+='<div style="font-family:Oswald,sans-serif;font-size:16px;font-weight:700">TOTAL: <span style="color:var(--accent)">$'+fmt(totalPrecio)+'</span></div>';
+    carritoHTML+='<button class="btn btn-lime" data-mid="'+m.id+'" data-nombre="'+m.nombre+'" onclick="enviarPedidoWA(this.dataset.mid,this.dataset.nombre)" style="font-size:12px">📱 Enviar pedido</button>';
+    carritoHTML+='</div></div>';
+  }
+
+  return carritoHTML+'<div class="card"><div class="card-title">🛍️ Productos disponibles</div>'+grid+'</div>';
+}
+
+
+function agregarCarrito(mid,pid,nombre,precio){
+  const carrito=getCarrito(mid);
+  const idx=carrito.findIndex(c=>c.id===pid);
+  if(idx>=0) carrito[idx].qty++;
+  else carrito.push({id:pid,nombre,precio,qty:1});
+  saveCarrito(mid,carrito);
+  renderTab('mitienda');
+}
+
+function cambiarQty(mid,pid,delta){
+  const carrito=getCarrito(mid);
+  const idx=carrito.findIndex(c=>c.id===pid);
+  if(idx<0) return;
+  carrito[idx].qty+=delta;
+  if(carrito[idx].qty<=0) carrito.splice(idx,1);
+  saveCarrito(mid,carrito);
+  renderTab('mitienda');
+}
+
+function enviarPedidoWA(mid, nombreCliente){
+  const carrito=getCarrito(mid);
+  if(!carrito.length){toast('❌ El carrito está vacío');return;}
+  const gym=cfg.gym||'el gym';
+  const total=carrito.reduce((a,i)=>a+i.precio*i.qty,0);
+  const tel=(cfg.telGym||'').replace(/\D/g,'');
+  let msg='🛍️ *Pedido de '+nombreCliente+'*\n\n';
+  carrito.forEach(item=>{
+    msg+='• '+item.nombre+' x'+item.qty+' — $'+fmt(item.precio*item.qty)+'\n';
+  });
+  msg+='\n💰 *TOTAL: $'+fmt(total)+'*\n';
+  msg+='\nFecha: '+new Date().toLocaleDateString('es-CO');
+  const numWA=tel||'573203694094';
+  window.open('https://wa.me/'+numWA+'?text='+encodeURIComponent(msg),'_blank');
+  // Limpiar carrito después de enviar
+  saveCarrito(mid,[]);
+  setTimeout(()=>{ renderTab('mitienda'); toast('✅ Pedido enviado por WhatsApp'); },500);
+}
+
+async function generarDescProducto(){
+  const nombre=document.getElementById('pNombre')?.value.trim();
+  if(!nombre){toast('❌ Escribe el nombre del producto primero');return;}
+  const btn=event.target;
+  btn.textContent='⏳';btn.disabled=true;
+  const KEY=(window.SIRYX_CONFIG&&window.SIRYX_CONFIG.groqKey)||cfg.groqKey||'';
+  try{
+    const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+KEY},
+      body:JSON.stringify({model:'llama-3.1-8b-instant',max_tokens:80,temperature:.85,
+        messages:[
+          {role:'system',content:'Eres un experto en marketing de productos fitness. Escribe descripciones cortas, persuasivas y auténticas que hagan que la gente sienta que NECESITA el producto. Máximo 15 palabras. Sin exageraciones falsas.'},
+          {role:'user',content:'Escribe una descripción corta y persuasiva para este producto de gym: "'+nombre+'". Que sea directa, que haga sentir al cliente que lo necesita para lograr sus resultados. Máximo 15 palabras.'}
+        ]})
+    });
+    const d=await r.json();
+    const desc=d.choices?.[0]?.message?.content?.replace(/^["']|["']$/g,'')||'';
+    const el=document.getElementById('pDesc');
+    if(el) el.value=desc;
+    toast('✅ Descripción generada');
+  }catch(e){
+    toast('❌ Error al generar descripción');
+  }
+  btn.textContent='🤖 IA';btn.disabled=false;
+}
+
+function previsualizarFoto(e){
+  const file=e.target.files[0]; if(!file) return;
+  // Validar tamaño máximo 2MB
+  if(file.size>2*1024*1024){toast('❌ La imagen es muy grande. Máximo 2MB');return;}
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const wrap=document.getElementById('fotoPreviewWrap');
+    if(!wrap) return;
+    wrap.innerHTML='<img src="'+ev.target.result+'" style="width:100%;height:100%;object-fit:cover">';
+  };
+  reader.readAsDataURL(file);
 }
 
 applyTheme();
