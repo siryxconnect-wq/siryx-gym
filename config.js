@@ -17,11 +17,11 @@
 window.SIRYX_CONFIG = {
 
   // LICENCIA DEL GYM (generada desde el keygen)
-  gymId:  'id_del_gym',       // ID exacto que usaste en el keygen
-  gymKey: '',                 // Clave XXXX-XXXX-XXXX del keygen
+  gymId:  'arnold_gym',       // ID exacto que usaste en el keygen
+  gymKey: '0FVG-0G2A-5683',                 // Clave XXXX-XXXX-XXXX del keygen
 
   // API DE INTELIGENCIA ARTIFICIAL
-  groqKey: '',                // Tu clave de Groq (console.groq.com)
+  groqKey: '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',                // Tu clave de Groq (console.groq.com)
 
   // INFO
   version:   '2.0',
