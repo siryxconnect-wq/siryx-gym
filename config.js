@@ -1,18 +1,31 @@
 /**
- * SiryX Gym — Configuración del servidor
- * ----------------------------------------
- * Para actualizar la API key de Groq:
- * 1. Ve a console.groq.com → API Keys → Create Key
- * 2. Reemplaza el valor de groqKey abajo
- * 3. Guarda el archivo en GitHub
- * 4. Todos los clientes reciben la nueva key automáticamente
+ * SiryX Gym — Configuración
+ * ─────────────────────────────────────────
+ * INSTRUCCIONES PARA ACTIVAR UN GYM NUEVO:
  *
- * ⚠️ NO compartir este archivo públicamente
+ * 1. Abre el keygen (siryx-keygen.html)
+ * 2. Ve a la pestaña 🏋️ SiryX Gym
+ * 3. Agrega el gym con su nombre e ID (ej: olympo_gym)
+ * 4. Genera la clave con las fechas del plan
+ * 5. Copia el ID y la clave aquí abajo
+ * 6. Sube este archivo a GitHub
+ *
+ * PARA SUSPENDER: borra el gymKey y guarda en GitHub
+ * ─────────────────────────────────────────
  */
 
 window.SIRYX_CONFIG = {
-  groqKey: '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',
-  version: '1.0',
-  producto: 'SiryX Gym',
+
+  // LICENCIA DEL GYM (generada desde el keygen)
+  gymId:  'id_del_gym',       // ID exacto que usaste en el keygen
+  gymKey: '',                 // Clave XXXX-XXXX-XXXX del keygen
+
+  // API DE INTELIGENCIA ARTIFICIAL
+  groqKey: '',                // Tu clave de Groq (console.groq.com)
+
+  // INFO
+  version:   '2.0',
+  producto:  'SiryX Gym',
   proveedor: 'SiryX Connect — WhatsApp 320 369 4094'
+
 };
