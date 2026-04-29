@@ -7,18 +7,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-
-/* 
- * ╔═══════════════════════════════════════╗
- * ║  SiryX Gym — Propiedad de SiryX Connect
- * ║  Desarrollado por: Arturo Rosas
- * ║  WhatsApp: 320 369 4094
- * ║  Build: 202604270322
- * ║  © 2025 SiryX Connect. Todos los derechos reservados.
- * ║  Uso no autorizado está prohibido por ley.
- * ╚═══════════════════════════════════════╝
- */
-
 /* ══ TOKENS ══ */
 [data-theme="dark"]{
   --bg:#09090f;--s1:#111118;--s2:#18181f;--s3:#1f1f28;
@@ -347,53 +335,6 @@ select.f-input option{background:var(--s2)}
 .client-dias-num{font-family:'Oswald',sans-serif;font-size:52px;color:var(--accent);line-height:1}
 .client-dias-lbl{font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
 </style>
-<script>
-// ══ PROTECCIÓN ANTI-INSPECCIÓN ══
-(function(){
-  // Deshabilitar clic derecho
-  document.addEventListener('contextmenu', e => e.preventDefault());
-  // Deshabilitar F12, Ctrl+Shift+I, Ctrl+U
-  document.addEventListener('keydown', function(e){
-    if(e.key==='F12' || 
-       (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) ||
-       (e.ctrlKey && e.key==='U')){
-      e.preventDefault();
-      return false;
-    }
-  });
-  // Detectar DevTools abierto
-  
-})();
-
-
-// ©2025 SiryX Connect - Código protegido
-// Arturo Rosas - 320 369 4094
-// Uso no autorizado está prohibido
-
-// ══ VERIFICACIÓN DE DOMINIO ══
-(function(){
-  const DOMINIOS_PERMITIDOS = [
-    'orix-servicios.github.io',
-    'localhost',
-    '127.0.0.1',
-    'file://'  // Para uso local permitido
-  ];
-  const host = window.location.hostname || 'localhost';
-  const protocol = window.location.protocol;
-  const esLocal = protocol === 'file:' || host === 'localhost' || host === '127.0.0.1';
-  const esDominio = DOMINIOS_PERMITIDOS.some(d => host.includes(d));
-  if(!esLocal && !esDominio){
-    document.body.innerHTML = `
-      <div style="position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:'Oswald',sans-serif;color:#fff;text-align:center;padding:20px">
-        <div style="font-size:48px">🔒</div>
-        <div style="font-size:24px;letter-spacing:3px;color:#0066FF">ACCESO BLOQUEADO</div>
-        <div style="font-size:13px;color:#555;max-width:300px;line-height:1.6">Esta aplicación no está autorizada para ejecutarse en este dominio.</div>
-        <div style="font-size:12px;color:#333;margin-top:8px">SiryX Connect — WhatsApp 320 369 4094</div>
-      </div>`;
-    throw new Error('Dominio no autorizado');
-  }
-})();
-</script>
 <!-- Configuración SiryX — no modificar -->
 <script src="config.js" onerror="console.warn('config.js no encontrado')"></script>
 </head>
@@ -606,163 +547,1759 @@ select.f-input option{background:var(--s2)}
 <div class="toast" id="toastEl"></div>
 
 <script>
-let miembros=JSON.parse(localStorage.getItem('sg_miembros')||'[]');let rutinas=JSON.parse(localStorage.getItem('sg_rutinas')||'[]');let asistencia=JSON.parse(localStorage.getItem('sg_asistencia')||'[]');let pagos=JSON.parse(localStorage.getItem('sg_pagos')||'[]');let cfg=JSON.parse(localStorage.getItem('sg_cfg')||'{}');let lic=JSON.parse(localStorage.getItem('sg_lic')||'{}');let rol=cfg.rol||'admin';let clienteActivo=cfg.clienteActivo||null;let charts={};const PLANES_DEFAULT={mensual:80000,trimestral:220000,semestral:400000,anual:720000,diario:8000};const DURACIONES={mensual:30,trimestral:90,semestral:180,anual:365,diario:1};const AV_COLORS=['av-lime','av-blue','av-green','av-red','av-orange','av-purple'];function save(){localStorage.setItem('sg_miembros',JSON.stringify(miembros));localStorage.setItem('sg_rutinas',JSON.stringify(rutinas));localStorage.setItem('sg_asistencia',JSON.stringify(asistencia));localStorage.setItem('sg_pagos',JSON.stringify(pagos));localStorage.setItem('sg_cfg',JSON.stringify(cfg));}
-function fmt(n){return'$'+Number(n||0).toLocaleString('es-CO');}
-function fmtF(d){return new Date(d+'T12:00:00').toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'});}
-function hoy(){return new Date().toISOString().slice(0,10);}
-function diasRestantes(m){if(!m.fechaFin)return 0;return Math.ceil((new Date(m.fechaFin+' 23:59:59')-new Date())/(1000*60*60*24));}
-function statusMiembro(m){const dias=diasRestantes(m);if(!m.fechaFin||!m.activo)return{label:'Sin membresía',cls:'badge-frozen',dias:0};if(dias>5)return{label:`${dias}d restantes`,cls:'badge-active',dias};if(dias>0)return{label:`⚠ Vence en ${dias}d`,cls:'badge-warn',dias};return{label:'Vencido',cls:'badge-exp',dias};}
-function initiales(nombre){return nombre.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);}
-function avColor(i){return AV_COLORS[i%AV_COLORS.length];}
-function toast(msg,ms=2500){const t=document.getElementById('toastEl');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),ms);}
-setInterval(()=>{const n=new Date();document.getElementById('clockEl').textContent=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;},1000);function toggleTheme(){const h=document.documentElement;const d=h.getAttribute('data-theme')==='dark';h.setAttribute('data-theme',d?'light':'dark');const btn=document.getElementById('themeBtn');if(btn)btn.textContent=d?'🌙':'☀️';localStorage.setItem('sg_theme',d?'light':'dark');renderDashboard();}
-function applyTheme(){const t=localStorage.getItem('sg_theme')||'dark';document.documentElement.setAttribute('data-theme',t);const btn=document.getElementById('themeBtn');if(btn)btn.textContent=t==='dark'?'🌙':'☀️';}
-const LIC_SECRET='SiryX2024$Connect#';function hashL(s){let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h)^s.charCodeAt(i);return Math.abs(h);}
-function decodeKey(key,cid){try{const p=key.trim().toUpperCase().split('-');if(p.length!==3)return null;const dI=parseInt(p[0],36),dF=parseInt(p[1],36),ck=p[2];const seed=`${LIC_SECRET}|${cid.toLowerCase().trim()}|${dI}|${dF}`;const exp=('000'+(hashL(seed)%9999+1000)).slice(-4);if(ck!==exp)return null;return{fi:new Date(dI*86400000).toISOString().slice(0,10),ff:new Date(dF*86400000).toISOString().slice(0,10)};}catch(e){return null;}}
-function checkLic(){if(!lic.activa||!lic.ff)return false;const g=new Date(lic.ff+'T23:59:59');g.setDate(g.getDate()+2);return new Date()<=g;}
-function activar(){const cid=document.getElementById('actId').value.trim().toLowerCase();const key=document.getElementById('actKey').value.trim().toUpperCase();const err=document.getElementById('actErr');err.textContent='';if(!cid){err.textContent='Ingresa el ID de cliente';return;}
-if(!key){err.textContent='Ingresa la clave';return;}
-const dec=decodeKey(key,cid);if(!dec){err.textContent='Clave incorrecta. Verifica con SiryX Connect.';document.getElementById('actKey').value='';return;}
-const ff=new Date(dec.ff+'T23:59:59');const g=new Date(ff);g.setDate(g.getDate()+2);if(new Date()>g){err.textContent='Esta clave ya venció. Solicita la nueva.';return;}
-const _fp=generarFingerprint();lic={activa:true,cid,fi:dec.fi,ff:dec.ff,activado:new Date().toISOString(),fingerprint:_fp};localStorage.setItem('sg_lic',JSON.stringify(lic));document.getElementById('actScreen').classList.remove('show');iniciarApp();toast(`✅ Licencia activa hasta ${fmtF(dec.ff)}`);}
-function iniciarApp(){applyTheme();if(cfg.accentColor)aplicarColor(cfg.accentColor);cfg.rol=cfg.rol||'admin';rol=cfg.rol;actualizarHeaderLogo();renderTabs();}
-function renderTabs(){const nav=document.getElementById('tabsNav');const main=document.getElementById('mainContent');const badge=miembros.filter(m=>statusMiembro(m).cls==='badge-exp'||statusMiembro(m).cls==='badge-warn').length;const badgeStr=badge?`<span class="tab-badge">${badge}</span>`:'';let tabs=[];if(rol==='admin'){tabs=[{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'miembros',icon:'👥',label:`Miembros${badgeStr}`},{id:'asistencia',icon:'✅',label:'Asistencia'},{id:'rutinas',icon:'🏋️',label:'Rutinas'},{id:'pagos',icon:'💰',label:'Pagos'},{id:'ia',icon:'🤖',label:'IA'},{id:'clases',icon:'📅',label:'Clases'},{id:'mensajes',icon:'💬',label:'Mensajes'},];document.getElementById('roleBadge').textContent='Admin';document.getElementById('roleBadge').className='role-badge role-admin';}else if(rol==='trainer'){tabs=[{id:'asistencia',icon:'✅',label:'Asistencia'},{id:'miembros',icon:'👥',label:'Miembros'},{id:'rutinas',icon:'🏋️',label:'Rutinas'},{id:'ia',icon:'🤖',label:'IA'},{id:'clases',icon:'📅',label:'Clases'},{id:'mensajes',icon:'💬',label:'Mensajes'},];document.getElementById('roleBadge').textContent='Entrenador';document.getElementById('roleBadge').className='role-badge role-trainer';}else{tabs=[{id:'micliente',icon:'👤',label:'Membresía'},{id:'miprogreso',icon:'📊',label:'Progreso'},{id:'mirutina',icon:'🏋️',label:'Rutina'},{id:'minutricion',icon:'🍽',label:'Nutrición'},{id:'milogros',icon:'🏆',label:'Logros'},{id:'misclases',icon:'📅',label:'Clases'},{id:'chat',icon:'🤖',label:'Entrenador IA'},];document.getElementById('roleBadge').textContent='Cliente';document.getElementById('roleBadge').className='role-badge role-client';}
-nav.innerHTML=tabs.map((t,i)=>`<button class="tab-btn${i===0?' active':''}"onclick="switchTab('${t.id}',this)">${t.icon}${t.label}</button>`).join('');renderTab(tabs[0].id);}
-function switchTab(id,btn){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderTab(id);}
-function renderTab(id){const main=document.getElementById('mainContent');Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}});charts={};const html={dashboard:renderDashboardHTML,miembros:renderMiembrosHTML,asistencia:renderAsistenciaHTML,rutinas:renderRutinasHTML,pagos:renderPagosHTML,ia:renderIAHTML,chat:renderChatHTML,micliente:renderMiClienteHTML,miprogreso:renderMiProgresoHTML,mirutina:renderMiRutinaHTML,minutricion:renderMiNutricionHTML,milogros:renderMiLogrosHTML,misclases:renderMiClasesHTML,miasistencia:renderMiAsistenciaHTML,mensajes:renderMensajesHTML,}[id];if(html){main.innerHTML=`<div class="tab-content active"><div class="scroll-area">${html()}</div></div>`;if(id==='dashboard')initDashboardCharts();}}
-function renderDashboardHTML(){const hoyStr=hoy();const mesStr=hoyStr.slice(0,7);const activos=miembros.filter(m=>statusMiembro(m).cls==='badge-active').length;const vencidos=miembros.filter(m=>statusMiembro(m).cls==='badge-exp').length;const porVencer=miembros.filter(m=>statusMiembro(m).cls==='badge-warn').length;const asistHoy=asistencia.filter(a=>a.fecha===hoyStr).length;const pagosHoy=pagos.filter(p=>p.fecha===hoyStr).reduce((s,p)=>s+(p.valor||0),0);const pagosMes=pagos.filter(p=>p.fecha&&p.fecha.startsWith(mesStr)).reduce((s,p)=>s+(p.valor||0),0);const alertas=miembros.filter(m=>statusMiembro(m).cls==='badge-exp'||statusMiembro(m).cls==='badge-warn');let alertHTML='';if(alertas.length){alertHTML=`<div class="card"><div class="card-title">⚠ Alertas de membresía</div>`+
-alertas.slice(0,5).map(m=>{const s=statusMiembro(m);return`<div class="alert ${s.cls==='badge-exp'?'alert-red':'alert-warn'}"style="margin-bottom:6px">${s.cls==='badge-exp'?'❌':'⏰'}<b>${m.nombre}</b>— ${s.label}<button class="btn-xs btn-xs-lime"style="margin-left:auto"onclick="renovarRapido('${m.id}')">Renovar</button></div>`;}).join('')+'</div>';}
-return`<div class="stats-grid"><div class="stat-card blue"><div class="stat-icon">👥</div><div class="stat-label">Miembros activos</div><div class="stat-val">${activos}</div><div class="stat-sub">de ${miembros.length}total</div></div><div class="stat-card red"><div class="stat-icon">⚠</div><div class="stat-label">Vencidos/por vencer</div><div class="stat-val">${vencidos+porVencer}</div><div class="stat-sub">${vencidos}venc.· ${porVencer}pronto</div></div><div class="stat-card green"><div class="stat-icon">✅</div><div class="stat-label">Asistencia hoy</div><div class="stat-val">${asistHoy}</div><div class="stat-sub">personas hoy</div></div><div class="stat-card blue"><div class="stat-icon">💰</div><div class="stat-label">Ingresos hoy</div><div class="stat-val"style="font-size:16px">${fmt(pagosHoy)}</div><div class="stat-sub">Mes:${fmt(pagosMes)}</div></div></div>${alertHTML}<div class="charts-grid"><div class="chart-box"><div class="chart-label">ASISTENCIA — 7 DÍAS</div><div class="chart-container"><canvas id="chartAsist"></canvas></div></div><div class="chart-box"><div class="chart-label">ESTADO MEMBRESÍAS</div><div class="chart-container"><canvas id="chartEstado"></canvas></div></div><div class="chart-box full"><div class="chart-label">INGRESOS — ÚLTIMOS 30 DÍAS</div><div class="chart-container"><canvas id="chartIngresos"></canvas></div></div></div>`;}
-function initDashboardCharts(){const dark=document.documentElement.getAttribute('data-theme')==='dark';const grid=dark?'rgba(255,255,255,.05)':'rgba(0,0,0,.05)';const txt=dark?'#5a5a78':'#8888a8';const hoyStr=hoy();const days7=[];for(let d=6;d>=0;d--){const dd=new Date();dd.setDate(dd.getDate()-d);const lbl=dd.toISOString().slice(0,10);const dn=['Do','Lu','Ma','Mi','Ju','Vi','Sá'][dd.getDay()];days7.push({lbl:dn,cnt:asistencia.filter(a=>a.fecha===lbl).length});}
-const c1=document.getElementById('chartAsist');if(c1)charts.asist=new Chart(c1,{type:'bar',data:{labels:days7.map(d=>d.lbl),datasets:[{data:days7.map(d=>d.cnt),backgroundColor:'rgba(0,102,255,.3)',borderColor:'#0066FF',borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:txt,font:{size:10}},grid:{color:grid}},y:{ticks:{color:txt,font:{size:10},stepSize:1},grid:{color:grid},beginAtZero:true}}}});const activos=miembros.filter(m=>statusMiembro(m).cls==='badge-active').length;const vencidos=miembros.filter(m=>statusMiembro(m).cls==='badge-exp').length;const porVencer=miembros.filter(m=>statusMiembro(m).cls==='badge-warn').length;const sinMemb=miembros.filter(m=>statusMiembro(m).cls==='badge-frozen').length;const c2=document.getElementById('chartEstado');if(c2)charts.estado=new Chart(c2,{type:'doughnut',data:{labels:['Activos','Por vencer','Vencidos','Sin membresía'],datasets:[{data:[activos||0.01,porVencer||0.01,vencidos||0.01,sinMemb||0.01],backgroundColor:['rgba(0,214,143,.7)','rgba(255,140,0,.7)','rgba(255,59,92,.7)','rgba(90,90,120,.4)'],borderColor:'transparent',hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'right',labels:{color:txt,font:{size:10},padding:8,boxWidth:10}}}}});const days30=[];for(let d=29;d>=0;d--){const dd=new Date();dd.setDate(dd.getDate()-d);const lbl=dd.toISOString().slice(0,10);const v=pagos.filter(p=>p.fecha===lbl).reduce((s,p)=>s+(p.valor||0),0);days30.push({lbl:dd.toLocaleDateString('es-CO',{day:'2-digit',month:'2-digit'}),v});}
-const c3=document.getElementById('chartIngresos');if(c3)charts.ing=new Chart(c3,{type:'line',data:{labels:days30.map(d=>d.lbl),datasets:[{data:days30.map(d=>d.v),borderColor:'#0066FF',backgroundColor:'rgba(0,102,255,.08)',tension:.4,fill:true,pointRadius:0,pointHoverRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:txt,font:{size:9},maxTicksLimit:10},grid:{color:grid}},y:{ticks:{color:txt,font:{size:9},callback:v=>fmt(v)},grid:{color:grid},beginAtZero:true}}}});}
-function renderMiembrosHTML(){const filtro=`<div style="display:flex;gap:8px;margin-bottom:4px"><input class="f-input"id="buscarM"placeholder="🔍 Buscar miembro..."oninput="filtrarMiembros()"style="flex:1"><select class="f-input"id="filtroEstado"onchange="filtrarMiembros()"style="width:130px"><option value="">Todos</option><option value="active">Activos</option><option value="warn">Por vencer</option><option value="exp">Vencidos</option></select>${rol==='admin'?`<button class="btn btn-lime"onclick="openMiembro()">+Nuevo</button>`:''}</div>`;const lista=miembros.map((m,i)=>{const s=statusMiembro(m);const dias=s.dias;const pct=dias>0?Math.min(100,Math.round(dias/DURACIONES[m.plan||'mensual']*100)):0;const progCls=dias>10?'prog-green':dias>3?'prog-yellow':'prog-red';return`<div class="member-row"onclick="verMiembro('${m.id}')"data-nombre="${m.nombre.toLowerCase()}"data-estado="${s.cls}"><div class="member-avatar ${avColor(i)}">${initiales(m.nombre)}</div><div class="member-info"><div class="member-name">${m.nombre}</div><div class="member-plan">${(m.plan||'').toUpperCase()}· ${m.tel||''}</div><div class="progress-wrap"style="margin-top:5px"><div class="progress-fill ${progCls}"style="width:${pct}%"></div></div></div><div class="member-status"><span class="badge ${s.cls}">${s.label}</span>${rol==='admin'?`<div style="display:flex;gap:4px;margin-top:4px"><button class="btn-xs btn-xs-lime"onclick="event.stopPropagation();renovarRapido('${m.id}')">↻</button><button class="btn-xs btn-xs-outline"onclick="event.stopPropagation();editarMiembro('${m.id}')">✏</button></div>`:''}</div></div>`;}).join('')||'<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">No hay miembros registrados</div>';return`${filtro}<div id="listaMiembros">${lista}</div>`;}
-function filtrarMiembros(){const q=(document.getElementById('buscarM').value||'').toLowerCase();const est=document.getElementById('filtroEstado').value;document.querySelectorAll('.member-row').forEach(row=>{const nombre=row.getAttribute('data-nombre')||'';const estado=row.getAttribute('data-estado')||'';const matchQ=!q||nombre.includes(q);const matchE=!est||estado.includes(est);row.style.display=(matchQ&&matchE)?'':'none';});}
-let editandoMiembroId=null;function openMiembro(){editandoMiembroId=null;document.getElementById('modalMiembroTitle').textContent='Nuevo Miembro';['mNombre','mTel','mDoc','mObs'].forEach(id=>document.getElementById(id).value='');document.getElementById('mPlan').value='mensual';document.getElementById('mFechaInicio').value=hoy();document.getElementById('mValor').value='';document.getElementById('modalMiembro').classList.add('open');}
-function editarMiembro(id){const m=miembros.find(m=>m.id===id);if(!m)return;editandoMiembroId=id;document.getElementById('modalMiembroTitle').textContent='Editar Miembro';document.getElementById('mNombre').value=m.nombre||'';document.getElementById('mTel').value=m.tel||'';document.getElementById('mDoc').value=m.doc||'';document.getElementById('mPlan').value=m.plan||'mensual';document.getElementById('mFechaInicio').value=m.fechaInicio||hoy();document.getElementById('mValor').value='';document.getElementById('mObs').value=m.obs||'';document.getElementById('modalMiembro').classList.add('open');}
-function closeMiembro(){document.getElementById('modalMiembro').classList.remove('open');}
-function guardarMiembro(){const nombre=document.getElementById('mNombre').value.trim();if(!nombre){toast('❌ Ingresa el nombre');return;}
-const plan=document.getElementById('mPlan').value;const fi=document.getElementById('mFechaInicio').value||hoy();const dias=DURACIONES[plan]||30;const ffDate=new Date(fi+'T12:00:00');ffDate.setDate(ffDate.getDate()+dias);const ff=ffDate.toISOString().slice(0,10);const valor=parseInt(document.getElementById('mValor').value)||0;if(editandoMiembroId){const idx=miembros.findIndex(m=>m.id===editandoMiembroId);if(idx>=0){miembros[idx]={...miembros[idx],nombre,tel:document.getElementById('mTel').value,doc:document.getElementById('mDoc').value,plan,fechaInicio:fi,fechaFin:ff,obs:document.getElementById('mObs').value,activo:true};}}else{const id='m'+Date.now();miembros.push({id,nombre,tel:document.getElementById('mTel').value,doc:document.getElementById('mDoc').value,plan,fechaInicio:fi,fechaFin:ff,obs:document.getElementById('mObs').value,activo:true,creadoEl:new Date().toISOString()});if(valor>0)pagos.push({id:'p'+Date.now(),miembroId:id,nombre,plan,valor,fecha:hoy(),tipo:'nueva'});}
-save();closeMiembro();renderTab('miembros');toast('✅ Miembro guardado');}
-function renovarRapido(id){const m=miembros.find(m=>m.id===id);if(!m)return;const dias=DURACIONES[m.plan||'mensual']||30;const base=new Date()>new Date(m.fechaFin+'T23:59:59')?hoy():m.fechaFin;const ffDate=new Date(base+'T12:00:00');ffDate.setDate(ffDate.getDate()+dias);m.fechaFin=ffDate.toISOString().slice(0,10);m.activo=true;const planes=getPreciosPlanes();const valor=planes[m.plan]||0;pagos.push({id:'p'+Date.now(),miembroId:m.id,nombre:m.nombre,plan:m.plan,valor,fecha:hoy(),tipo:'renovacion'});save();renderTabs();toast(`✅ ${m.nombre}renovado hasta ${fmtF(m.fechaFin)}`);}
-function verMiembro(id){const m=miembros.find(m=>m.id===id);if(!m)return;const s=statusMiembro(m);const r=rutinas.find(r=>r.miembroId===id);const asistM=asistencia.filter(a=>a.miembroId===id).slice(-10).reverse();alert(`👤 ${m.nombre}\n📋 Plan:${m.plan||'—'}\n📅 Vence:${m.fechaFin?fmtF(m.fechaFin):'—'}\n${s.label}\n📞 ${m.tel||'—'}\n🏋️ Rutina:${r?r.nombre:'Sin rutina'}\n✅ Última asistencia:${asistM[0]?asistM[0].fecha:'Nunca'}`);}
-function getPreciosPlanes(){try{const raw=cfg.planes||'';if(!raw)return PLANES_DEFAULT;const obj={};raw.split(',').forEach(p=>{const[k,v]=p.split(':');if(k&&v)obj[k.trim()]=parseInt(v)||0;});return{...PLANES_DEFAULT,...obj};}catch(e){return PLANES_DEFAULT;}}
-function renderAsistenciaHTML(){const hoyStr=hoy();const registradosHoy=new Set(asistencia.filter(a=>a.fecha===hoyStr).map(a=>a.miembroId));const activos=miembros.filter(m=>m.activo&&statusMiembro(m).cls!=='badge-frozen');const grid=activos.map((m,i)=>{const checked=registradosHoy.has(m.id);const hora=asistencia.find(a=>a.miembroId===m.id&&a.fecha===hoyStr)?.hora||'';return`<div class="checkin-btn ${checked?'checked':''}"onclick="toggleAsistencia('${m.id}','${m.nombre}')"><div class="checkin-icon">${checked?'✅':'⬜'}</div><div class="checkin-name">${m.nombre}</div><div class="checkin-time">${checked?hora:'—'}</div></div>`;}).join('');const historial=asistencia.filter(a=>a.fecha===hoyStr).map(a=>{const m=miembros.find(m=>m.id===a.miembroId);return`<div class="alert alert-ok">✅<b>${m?.nombre||a.nombre}</b>— ${a.hora}</div>`;}).reverse().join('')||'<div style="color:var(--muted);font-size:12px;padding:10px 0">Nadie registrado hoy aún</div>';return`<div class="card"><div class="card-title">📅 Check-in de hoy — ${new Date().toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long'})}<span>${registradosHoy.size}registrados</span></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px">${grid||'<div style="color:var(--muted);font-size:12px">No hay miembros activos</div>'}</div></div><div class="card"><div class="card-title">📋 Registro de hoy</div><div style="display:flex;flex-direction:column;gap:6px">${historial}</div></div>`;}
-function toggleAsistencia(miembroId,nombre){const hoyStr=hoy();const idx=asistencia.findIndex(a=>a.miembroId===miembroId&&a.fecha===hoyStr);if(idx>=0){asistencia.splice(idx,1);toast(`↩ ${nombre}removido del registro`);}else{const hora=new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});asistencia.push({id:'a'+Date.now(),miembroId,nombre,fecha:hoyStr,hora});toast(`✅ ${nombre}— ${hora}`);}
-save();renderTab('asistencia');}
-function renderRutinasHTML(){const lista=rutinas.map(r=>{const m=miembros.find(m=>m.id===r.miembroId);return`<div class="card"style="gap:10px"><div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-family:'Oswald',sans-serif;font-size:15px;font-weight:700;letter-spacing:.5px">${r.nombre}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">👤 ${m?.nombre||'Miembro no encontrado'}</div></div><div style="display:flex;gap:5px">${rol==='admin'?`<button class="btn-xs btn-xs-outline"onclick="editarRutina('${r.id}')">✏</button><button class="btn-xs btn-xs-red"onclick="eliminarRutina('${r.id}')">🗑</button>`:''}</div></div><div style="display:flex;flex-direction:column;gap:5px">${r.textoCompleto?`<div style="font-size:12px;line-height:1.7;color:var(--text)">${formatAIResponse?formatAIResponse(r.textoCompleto):r.textoCompleto.replace(/\n/g,'<br>')}</div>`:(r.ejercicios||[]).slice(0,4).map((e,i)=>`<div class="ejercicio-row"><div class="ej-num">${i+1}</div><div class="ej-info"><div class="ej-name">${e.nombre}</div><div class="ej-detail">${e.series||'—'}series · ${e.reps||'—'}reps · ${e.peso||'—'}kg</div></div></div>`).join('')}
-${!r.textoCompleto&&r.ejercicios?.length>4?`<div style="font-size:11px;color:var(--muted);text-align:center">+${r.ejercicios.length-4}más</div>`:''}</div></div>`;}).join('')||'<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">No hay rutinas asignadas aún</div>';return`<div style="display:flex;justify-content:flex-end;margin-bottom:4px"><button class="btn btn-lime"onclick="openRutina()">+Nueva rutina</button></div>${lista}`;}
-let editandoRutinaId=null;let ejerciciosTmp=[];function openRutina(){editandoRutinaId=null;ejerciciosTmp=[];document.getElementById('modalRutinaTitle').textContent='Nueva Rutina';document.getElementById('rNombre').value='';const sel=document.getElementById('rMiembro');sel.innerHTML=miembros.map(m=>`<option value="${m.id}">${m.nombre}</option>`).join('');renderEjerciciosTmp();document.getElementById('modalRutina').classList.add('open');}
-function editarRutina(id){const r=rutinas.find(r=>r.id===id);if(!r)return;editandoRutinaId=id;ejerciciosTmp=[...r.ejercicios||[]];document.getElementById('modalRutinaTitle').textContent='Editar Rutina';document.getElementById('rNombre').value=r.nombre;const sel=document.getElementById('rMiembro');sel.innerHTML=miembros.map(m=>`<option value="${m.id}"${m.id===r.miembroId?'selected':''}>${m.nombre}</option>`).join('');renderEjerciciosTmp();document.getElementById('modalRutina').classList.add('open');}
-function closeRutina(){document.getElementById('modalRutina').classList.remove('open');}
-function renderEjerciciosTmp(){document.getElementById('ejerciciosList').innerHTML=ejerciciosTmp.map((e,i)=>`<div class="ejercicio-row"><div class="ej-num">${i+1}</div><div class="ej-info"style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:4px"><input class="f-input"value="${e.nombre}"onchange="ejerciciosTmp[${i}].nombre=this.value"placeholder="Ejercicio"style="font-size:11px;padding:5px 8px"><input class="f-input"value="${e.series}"onchange="ejerciciosTmp[${i}].series=this.value"placeholder="Series"style="font-size:11px;padding:5px 8px;text-align:center"><input class="f-input"value="${e.reps}"onchange="ejerciciosTmp[${i}].reps=this.value"placeholder="Reps"style="font-size:11px;padding:5px 8px;text-align:center"><input class="f-input"value="${e.peso}"onchange="ejerciciosTmp[${i}].peso=this.value"placeholder="Kg"style="font-size:11px;padding:5px 8px;text-align:center"></div><button class="btn-xs btn-xs-red"onclick="quitarEj(${i})">✕</button></div>`).join('');}
-function addEjercicio(){ejerciciosTmp.push({nombre:'',series:'3',reps:'12',peso:'—'});renderEjerciciosTmp();}
-function quitarEj(i){ejerciciosTmp.splice(i,1);renderEjerciciosTmp();}
-function guardarRutina(){const nombre=document.getElementById('rNombre').value.trim();const miembroId=document.getElementById('rMiembro').value;if(!nombre){toast('❌ Ingresa el nombre de la rutina');return;}
-if(editandoRutinaId){const idx=rutinas.findIndex(r=>r.id===editandoRutinaId);if(idx>=0)rutinas[idx]={...rutinas[idx],nombre,miembroId,ejercicios:[...ejerciciosTmp]};}else{rutinas.push({id:'r'+Date.now(),nombre,miembroId,ejercicios:[...ejerciciosTmp],creadoEl:new Date().toISOString()});}
-save();closeRutina();renderTab('rutinas');toast('✅ Rutina guardada');}
-function eliminarRutina(id){if(!confirm('¿Eliminar rutina?'))return;rutinas=rutinas.filter(r=>r.id!==id);save();renderTab('rutinas');}
-function renderPagosHTML(){const hoyStr=hoy();const mesStr=hoyStr.slice(0,7);const totHoy=pagos.filter(p=>p.fecha===hoyStr).reduce((s,p)=>s+(p.valor||0),0);const totMes=pagos.filter(p=>p.fecha&&p.fecha.startsWith(mesStr)).reduce((s,p)=>s+(p.valor||0),0);const tabla=pagos.slice().reverse().slice(0,30).map(p=>`<tr><td style="font-family:var(--mono);font-size:10px;color:var(--muted)">${p.fecha}</td><td style="font-size:12px;font-weight:500">${p.nombre||'—'}</td><td><span class="badge ${p.tipo==='renovacion'?'badge-warn':'badge-active'}">${p.plan||'—'}</span></td><td style="font-family:var(--mono);color:#5599FF;font-weight:700">${fmt(p.valor)}</td></tr>`).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px">Sin pagos registrados</td></tr>';return`<div class="stats-grid"><div class="stat-card blue"><div class="stat-icon">📅</div><div class="stat-label">Ingresos hoy</div><div class="stat-val"style="font-size:18px">${fmt(totHoy)}</div></div><div class="stat-card green"><div class="stat-icon">📆</div><div class="stat-label">Ingresos del mes</div><div class="stat-val"style="font-size:18px">${fmt(totMes)}</div></div></div><div class="card"><div class="card-title">💰 Historial de pagos</div><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr><th style="text-align:left;padding:7px 8px;border-bottom:1px solid var(--border);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Fecha</th><th style="text-align:left;padding:7px 8px;border-bottom:1px solid var(--border);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Miembro</th><th style="text-align:left;padding:7px 8px;border-bottom:1px solid var(--border);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Plan</th><th style="text-align:left;padding:7px 8px;border-bottom:1px solid var(--border);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Valor</th></tr></thead><tbody>${tabla}</tbody></table></div>`;}
-function getMiembro(){if(!clienteActivo)return miembros[0];return miembros.find(m=>m.id===clienteActivo)||miembros[0];}
-function renderMiClienteHTML(){const m=getMiembro();if(!m)return'<div class="alert alert-info">No hay miembros registrados en este gym</div>';const s=statusMiembro(m);const dias=s.dias;const pct=dias>0?Math.min(100,Math.round(dias/DURACIONES[m.plan||'mensual']*100)):0;const progCls=dias>10?'prog-green':dias>3?'prog-yellow':'prog-red';return`<div class="client-card-big"><div style="display:flex;align-items:center;gap:12px"><div class="member-avatar ${avColor(0)}"style="width:52px;height:52px;font-size:22px">${initiales(m.nombre)}</div><div><div style="font-size:18px;font-weight:700">${m.nombre}</div><div style="font-size:12px;color:var(--muted);font-family:'Oswald',sans-serif;letter-spacing:.5px;text-transform:uppercase">${m.plan||'Sin plan'}</div></div></div><div style="display:flex;align-items:flex-end;gap:8px"><div class="client-dias-num">${dias>0?dias:0}</div><div class="client-dias-lbl">días restantes</div></div><div class="progress-wrap"style="height:8px"><div class="progress-fill ${progCls}"style="width:${pct}%"></div></div><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)"><span>Inicio:${m.fechaInicio?fmtF(m.fechaInicio):'—'}</span><span>Vence:${m.fechaFin?fmtF(m.fechaFin):'—'}</span></div></div><div class="card"><div class="card-title">📊 Mi estado</div><div class="alert ${dias>5?'alert-ok':dias>0?'alert-warn':'alert-red'}">${dias>5?'✅ Membresía activa':dias>0?'⏰ Tu membresía está por vencer':'❌ Membresía vencida'}</div><div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px"><div class="stat-card blue"><div class="stat-label">Plan</div><div class="stat-val"style="font-size:16px">${(m.plan||'—').toUpperCase()}</div></div><div class="stat-card blue"><div class="stat-label">Tel</div><div class="stat-val"style="font-size:14px">${m.tel||'—'}</div></div></div>${m.obs?`<div class="alert alert-info"style="margin-top:8px">📝 ${m.obs}</div>`:''}</div>`;}
-function renderMiRutinaHTML(){const m=getMiembro();if(!m)return'<div class="alert alert-info">No hay miembro seleccionado</div>';const r=rutinas.find(r=>r.miembroId===m.id);if(!r)return`<div class="card"><div class="card-title">🏋️ Mi Rutina</div><div class="alert alert-info">No tienes rutina asignada aún.Consulta con tu entrenador.</div></div>`;if(r.textoCompleto){const lineas=r.textoCompleto.split('\n');let html='';lineas.forEach(l=>{const m=l.match(/[•\-\*]\s*([A-Za-záéíóúÁÉÍÓÚñÑ][^:•\n]{3,40})(?::|—|-)/i);if(m){const nombreEj=m[1].trim();html+=`<div class="ejercicio-row"style="justify-content:space-between"><div style="display:flex;align-items:flex-start;gap:8px;flex:1"><span style="color:var(--accent);font-size:14px;flex-shrink:0">•</span><span style="font-size:13px;line-height:1.5">${l.replace(/^[•\-\*]\s*/,'')}</span></div></div>`;}else if(l.trim()){html+=`<div style="font-size:${l.startsWith('**')?'13px':'12px'};font-weight:${l.startsWith('**')?'700':'400'};color:${l.startsWith('**')?'var(--accent)':'var(--text)'};padding:${l.startsWith('**')?'8px 0 2px':'2px 0'};line-height:1.5">${l.replace(/\*\*/g,'')}</div>`;}});return`<div class="card"><div class="card-title">🏋️ ${r.nombre}<span style="font-size:10px;color:var(--muted);font-family:var(--mono)">IA ✨</span></div><div style="display:flex;flex-direction:column;gap:4px">${html}</div></div>`;}
-return`<div class="card"><div class="card-title">🏋️ ${r.nombre}</div><div style="display:flex;flex-direction:column;gap:6px">${(r.ejercicios||[]).map((e,i)=>`<div class="ejercicio-row"><div class="ej-num">${i+1}</div><div class="ej-info"><div class="ej-name">${e.nombre}</div><div class="ej-detail">${e.series}series · ${e.reps}reps${e.peso&&e.peso!=='—'?' · '+e.peso+' kg':''}</div></div></div>`).join('')}</div></div>`;}
-function renderMiAsistenciaHTML(){const m=getMiembro();if(!m)return'';const hist=asistencia.filter(a=>a.miembroId===m.id).slice().reverse().slice(0,20);const total=asistencia.filter(a=>a.miembroId===m.id).length;return`<div class="stats-grid"><div class="stat-card blue"><div class="stat-icon">✅</div><div class="stat-label">Total asistencias</div><div class="stat-val">${total}</div></div><div class="stat-card blue"><div class="stat-icon">📅</div><div class="stat-label">Este mes</div><div class="stat-val">${asistencia.filter(a=>a.miembroId===m.id&&a.fecha?.startsWith(hoy().slice(0,7))).length}</div></div></div><div class="card"><div class="card-title">📋 Historial</div><div style="display:flex;flex-direction:column;gap:5px">${hist.length?hist.map(a=>`<div class="alert alert-ok">✅ ${fmtF(a.fecha)}— ${a.hora}</div>`).join(''):'<div style="color:var(--muted);font-size:12px;padding:10px">Sin registros de asistencia</div>'}</div></div>`;}
-function handleGymLogo(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(ev){cfg.logoGym=ev.target.result;mostrarLogoGym(cfg.logoGym);};reader.readAsDataURL(file);}
-function mostrarLogoGym(src){const img=document.getElementById('logoPreviewImg');const ph=document.getElementById('logoPlaceholder');const btn=document.getElementById('btnQuitarLogoGym');if(img&&ph&&btn){img.src=src;img.style.display='block';ph.style.display='none';btn.style.display='block';}
-actualizarHeaderLogo();}
-function quitarLogoGym(){delete cfg.logoGym;const img=document.getElementById('logoPreviewImg');const ph=document.getElementById('logoPlaceholder');const btn=document.getElementById('btnQuitarLogoGym');if(img&&ph&&btn){img.style.display='none';ph.style.display='block';btn.style.display='none';}
-actualizarHeaderLogo();}
-function actualizarHeaderLogo(){const wrap=document.getElementById('gymLogoWrap');const nomEl=document.getElementById('gymNombreHeader');const subEl=document.getElementById('gymSubHeader');if(!wrap)return;if(cfg.logoGym){wrap.innerHTML=`<img src="${cfg.logoGym}"style="width:32px;height:32px;border-radius:6px;object-fit:cover">`;}else{wrap.innerHTML='<div class="logo-icon">💪</div>';}
-if(nomEl&&cfg.gym){const parts=cfg.gym.split(' ');nomEl.textContent=parts[0];if(subEl)subEl.textContent=parts.slice(1).join(' ')||'Gym';}}
-function openCfg(){document.getElementById('cfgGym').value=cfg.gym||'';if(document.getElementById('cfgEslogan'))document.getElementById('cfgEslogan').value=cfg.eslogan||'';document.getElementById('cfgRol').value=cfg.rol||'admin';document.getElementById('cfgPlanes').value=cfg.planes||'';document.getElementById('cfgOpenAI').value=cfg.openaiKey||'';document.getElementById('cfgGroq').value=cfg.groqKey||'';if(cfg.logoGym)mostrarLogoGym(cfg.logoGym);initColorPicker();const sel=document.getElementById('cfgClienteSel');sel.innerHTML=miembros.map(m=>`<option value="${m.id}"${m.id===clienteActivo?'selected':''}>${m.nombre}</option>`).join('');toggleClienteWrap();document.getElementById('cfgRol').addEventListener('change',toggleClienteWrap);document.getElementById('modalCfg').classList.add('open');}
-function toggleClienteWrap(){const r=document.getElementById('cfgRol').value;document.getElementById('cfgClienteWrap').style.display=r==='client'?'flex':'none';}
-function closeCfg(){document.getElementById('modalCfg').classList.remove('open');}
-function guardarCfg(){const colorEl=document.getElementById('cfgColorCustom');if(colorEl&&colorEl.value){cfg.accentColor=colorEl.value;aplicarColor(colorEl.value);}
-cfg.gym=document.getElementById('cfgGym').value;if(document.getElementById('cfgEslogan'))cfg.eslogan=document.getElementById('cfgEslogan').value;cfg.rol=document.getElementById('cfgRol').value;cfg.planes=document.getElementById('cfgPlanes').value;cfg.openaiKey=document.getElementById('cfgOpenAI').value.trim();cfg.groqKey=document.getElementById('cfgGroq').value.trim();if(cfg.rol==='client')cfg.clienteActivo=document.getElementById('cfgClienteSel').value;rol=cfg.rol;clienteActivo=cfg.clienteActivo||null;save();actualizarHeaderLogo();closeCfg();renderTabs();toast('✅ Configuración guardada');}
-function exportarDatos(){const data={v:'1.0',exp:new Date().toISOString(),gym:cfg.gym,miembros,rutinas,asistencia,pagos};const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`siryx-gym-backup-${hoy()}.json`;a.click();toast('✅ Backup exportado');}
-function importarDatos(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){try{const d=JSON.parse(ev.target.result);if(!confirm(`¿Importar datos de"${d.gym||'backup'}"?\nEsto reemplaza todos los datos actuales.`))return;miembros=d.miembros||[];rutinas=d.rutinas||[];asistencia=d.asistencia||[];pagos=d.pagos||[];save();closeCfg();renderTabs();toast(`✅ Datos importados`);}catch(err){toast('❌ Archivo inválido');}};r.readAsText(f);e.target.value='';}
-let aiProvider='groq';let chatHistory=[];async function callAI(messages,maxTokens=1200){const GROQ_KEY=(window.SIRYX_CONFIG&&window.SIRYX_CONFIG.groqKey)||cfg.groqKey||'';const useOpenAI=(aiProvider==='openai')&&cfg.openaiKey;if(useOpenAI){const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${cfg.openaiKey}`},body:JSON.stringify({model:'gpt-4o-mini',max_tokens:maxTokens,temperature:.7,messages})});const d=await res.json();if(d.error)throw new Error(d.error.message);return d.choices?.[0]?.message?.content||'';}else{const key=cfg.groqKey||GROQ_KEY;const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'llama-3.1-8b-instant',max_tokens:maxTokens,temperature:.7,messages})});const d=await res.json();if(d.error)throw new Error(d.error.message);return d.choices?.[0]?.message?.content||'';}}
-function noKeyMsg(){return`<div class="alert alert-warn">⚙ Configura tu API Key en el botón<b>⚙</b>→ sección IA.<br>Puedes usar<b>Groq gratis</b>(console.groq.com)o<b>OpenAI</b>si tienes créditos.</div>`;}
-function formatAIResponse(text){return text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/^#{1,3}\s+(.+)$/gm,'<strong style="color:var(--accent);display:block;margin-top:8px">$1</strong>').replace(/^[-•]\s+(.+)$/gm,'<span style="display:block;padding-left:12px">• $1</span>').replace(/\n/g,'<br>');}
-function renderIAHTML(){const hasKey=cfg.openaiKey||cfg.groqKey;const providerSelector=`<div class="ai-provider"><button class="provider-btn ${aiProvider==='groq'?'active':''}"onclick="setProvider('groq')">🆓 Groq(Gratis)</button><button class="provider-btn ${aiProvider==='openai'?'active':''}"onclick="setProvider('openai')">💳 OpenAI</button></div>`;const miembrosOpts=miembros.map(m=>`<option value="${m.id}">${m.nombre}</option>`).join('');return`${!hasKey?noKeyMsg():''}
-${providerSelector}<!--1.GENERADOR DE RUTINAS--><div class="ai-panel"><div><div class="ai-badge">✨ IA</div></div><div class="ai-title">🏋️ Generador de Rutinas</div><div class="ai-desc">Selecciona las opciones o escribe tu propia descripción y la IA arma la rutina completa.</div><div class="f-field"><label>Miembro(opcional)</label><select class="f-input"id="aiRutinaM"style="width:100%"><option value="">— Sin asignar —</option>${miembrosOpts}</select></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div class="f-field"><label>Objetivo</label><select class="f-input"id="aiRutinaObjetivo"style="width:100%"><option value="pérdida de peso">Pérdida de peso</option><option value="ganancia muscular">Ganancia muscular</option><option value="tonificación">Tonificación</option><option value="resistencia y cardio">Resistencia y cardio</option><option value="fuerza">Fuerza</option><option value="flexibilidad">Flexibilidad</option></select></div><div class="f-field"><label>Nivel</label><select class="f-input"id="aiRutinaNivel"style="width:100%"><option value="principiante">Principiante</option><option value="intermedio">Intermedio</option><option value="avanzado">Avanzado</option></select></div><div class="f-field"><label>Días por semana</label><select class="f-input"id="aiRutinaDias"style="width:100%"><option value="2">2 días</option><option value="3"selected>3 días</option><option value="4">4 días</option><option value="5">5 días</option><option value="6">6 días</option></select></div><div class="f-field"><label>Equipamiento</label><select class="f-input"id="aiRutinaEquipo"style="width:100%"><option value="gym completo">Gym completo</option><option value="mancuernas y barra">Mancuernas y barra</option><option value="solo peso corporal">Solo peso corporal</option><option value="máquinas">Máquinas</option></select></div></div><div class="f-field"><label>Detalles adicionales(opcional)</label><textarea class="ai-textarea"id="aiRutinaPrompt"placeholder="Ej: Sin sentadillas por lesión en rodilla, enfocarse en parte superior..."style="min-height:70px"></textarea></div><button class="btn btn-lime"id="btnGenRutina"onclick="generarRutinaIA()"style="width:100%">⚡ Generar Rutina</button><div class="ai-result"id="aiRutinaResult"></div></div><!--2.PLAN NUTRICIONAL--><div class="ai-panel"><div><div class="ai-badge">✨ IA</div></div><div class="ai-title">🥗 Plan Nutricional</div><div class="ai-desc">Genera un plan de alimentación personalizado.Se guardará en el perfil del miembro.</div><div class="f-field"><label>Asignar a miembro</label><select class="f-input"id="aiNutMiembro"style="width:100%"><option value="">— Sin asignar —</option>${miembrosOpts}</select></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div class="f-field"><label>Peso(kg)</label><input class="f-input"id="aiNutPeso"placeholder="75"type="number"style="width:100%"></div><div class="f-field"><label>Altura(cm)</label><input class="f-input"id="aiNutAltura"placeholder="175"type="number"style="width:100%"></div><div class="f-field"><label>Objetivo</label><select class="f-input"id="aiNutObjetivo"style="width:100%"><option value="perder peso">Perder peso</option><option value="ganar músculo">Ganar músculo</option><option value="mantener peso">Mantener peso</option><option value="mejorar rendimiento">Mejorar rendimiento</option></select></div><div class="f-field"><label>Nivel de actividad</label><select class="f-input"id="aiNutActividad"style="width:100%"><option value="sedentario">Sedentario</option><option value="ligero">Ligero(1-3 días/sem)</option><option value="moderado">Moderado(3-5 días/sem)</option><option value="intenso">Intenso(6-7 días/sem)</option></select></div></div><button class="btn btn-lime"id="btnGenNutri"onclick="generarNutriIA()"style="width:100%">⚡ Generar Plan</button><div class="ai-result"id="aiNutriResult"></div></div><!--3.ANÁLISIS DE NEGOCIO--><div class="ai-panel"><div><div class="ai-badge">✨ IA</div></div><div class="ai-title">📊 Análisis de Negocio</div><div class="ai-desc">La IA analiza los datos del gym y entrega insights accionables.</div><button class="btn btn-lime"id="btnAnalisis"onclick="analizarNegocio()"style="width:100%">⚡ Analizar ahora</button><div class="ai-result"id="aiAnalisisResult"></div></div>`;}
-function setProvider(p){aiProvider=p;document.querySelectorAll('.provider-btn').forEach(b=>{b.classList.toggle('active',b.textContent.toLowerCase().includes(p));});}
-let rutinaIAGenerada=null;async function generarRutinaIA(){const objetivo=document.getElementById('aiRutinaObjetivo')?.value||'pérdida de peso';const nivel=document.getElementById('aiRutinaNivel')?.value||'principiante';const dias=document.getElementById('aiRutinaDias')?.value||'3';const equipo=document.getElementById('aiRutinaEquipo')?.value||'gym completo';const extra=document.getElementById('aiRutinaPrompt')?.value.trim()||'';const btn=document.getElementById('btnGenRutina');setBtnLoading(btn,true,'⚡ Generar Rutina');const resultEl=document.getElementById('aiRutinaResult');resultEl.classList.remove('show');try{const descripcion=`Objetivo:${objetivo}|Nivel:${nivel}|${dias}días/semana|Equipamiento:${equipo}${extra?' | Notas: '+extra:''}`;const resp=await callAI([{role:'system',content:'Eres un entrenador personal experto. Responde siempre en español. Sé muy específico con series, reps y descansos. Usa este formato exacto:\n• NombreEjercicio: X series x Y reps (descanso: Z seg)'},{role:'user',content:`Crea una rutina de entrenamiento completa con estas características:${descripcion}.Formato obligatorio:**Nombre de la rutina****Día 1 —[Grupo muscular]**• Ejercicio 1:3 series x 12 reps(descanso:60 seg)
-• Ejercicio 2:4 series x 10 reps(descanso:90 seg)
-(repetir para cada día)**Consejos finales**Nota de progresión y recomendaciones.`}],2000);rutinaIAGenerada=resp;resultEl.innerHTML=formatAIResponse(resp)+`<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)"><button class="btn btn-lime"onclick="guardarRutinaDesdeIA(this)"style="width:100%">💾 Guardar esta rutina</button></div>`;resultEl.classList.add('show');resultEl.scrollIntoView({behavior:'smooth',block:'nearest'});}catch(e){handleAIError(e,'aiRutinaResult');}
-setBtnLoading(btn,false,'⚡ Generar Rutina');}
-function guardarRutinaDesdeIA(btnEl){if(!rutinaIAGenerada)return;const miembroId=document.getElementById('aiRutinaM').value;const lineas=rutinaIAGenerada.split('\n').map(l=>l.trim()).filter(l=>l);const nombre=lineas[0].replace(/\*+/g,'').trim()||'Rutina IA';const ejercicios=[];rutinaIAGenerada.split('\n').forEach(l=>{let m=l.match(/[•\-\*]\s*([^:]+):\s*(\d+)\s*series?\s*[x×xX]\s*(\d+)/i);if(m){ejercicios.push({nombre:m[1].trim(),series:m[2],reps:m[3],peso:'—'});return;}
-m=l.match(/[•\-\*]\s*([^—]+)[—\-]\s*(\d+)\s*series?\s*[x×xX]\s*(\d+)/i);if(m){ejercicios.push({nombre:m[1].trim(),series:m[2],reps:m[3],peso:'—'});return;}
-m=l.match(/[•\-\*]\s*(.{5,40})\s+(\d+)[x×]\s*(\d+)/i);if(m)ejercicios.push({nombre:m[1].trim(),series:m[2],reps:m[3],peso:'—'});});if(ejercicios.length===0){rutinaIAGenerada.split('\n').forEach(l=>{if(l.trim().match(/^[•\-\*]/)){const txt=l.replace(/^[•\-\*]\s*/,'').split(':')[0].trim();if(txt.length>3)ejercicios.push({nombre:txt,series:'3',reps:'12',peso:'—'});}});}
-rutinas.push({id:'r'+Date.now(),nombre,miembroId:miembroId||null,ejercicios,textoCompleto:rutinaIAGenerada,creadoEl:new Date().toISOString(),fuente:'IA'});save();toast(`✅ Rutina"${nombre}"guardada con ${ejercicios.length}ejercicio(s)`);if(btnEl){btnEl.textContent='✅ Guardada';btnEl.disabled=true;btnEl.style.opacity='.6';}
-rutinaIAGenerada=null;}
-async function generarNutriIA(){const peso=document.getElementById('aiNutPeso').value||70;const altura=document.getElementById('aiNutAltura').value||170;const objetivo=document.getElementById('aiNutObjetivo').value;const actividad=document.getElementById('aiNutActividad').value;const btn=document.getElementById('btnGenNutri');setBtnLoading(btn,true,'⚡ Generar Plan');document.getElementById('aiNutriResult').classList.remove('show');try{const miembroNutriId=document.getElementById('aiNutMiembro')?.value||'';const resp=await callAI([{role:'system',content:'Eres un nutricionista deportivo experto. Responde siempre en español, de forma clara y práctica.'},{role:'user',content:`Genera un plan nutricional para:-Peso:${peso}kg,Altura:${altura}cm
--Objetivo:${objetivo}
--Nivel de actividad:${actividad}
-Incluye:1.Calorías diarias recomendadas
-2.Macronutrientes(proteínas,carbohidratos,grasas en gramos)
-3.Plan de comidas para un día típico(desayuno,merienda,almuerzo,merienda,cena)
-4.Alimentos recomendados y a evitar
-5.Suplementos opcionales`}],1500);const cals=resp.match(/(\d{4})\s*(?:kcal|calorías|cal)/i);const prots=resp.match(/(\d+)\s*g?\s*(?:de\s*)?proteína/i);const carbos=resp.match(/(\d+)\s*g?\s*(?:de\s*)?carbohidrato/i);const grasas=resp.match(/(\d+)\s*g?\s*(?:de\s*)?grasa/i);const midNutri=document.getElementById('aiNutMiembro')?.value;if(midNutri){const planObj={texto:resp,objetivo:document.getElementById('aiNutObjetivo').value,macros:{calorias:cals?cals[1]:'—',proteinas:prots?prots[1]:'—',carbos:carbos?carbos[1]:'—',grasas:grasas?grasas[1]:'—'},desayuno:extraerSeccion(resp,'desayuno'),almuerzo:extraerSeccion(resp,'almuerzo'),cena:extraerSeccion(resp,'cena'),consejos:extraerSeccion(resp,'consejo|suplemento|recomendación'),fecha:hoy()};localStorage.setItem('sg_nutri_'+midNutri,JSON.stringify(planObj));toast('✅ Plan guardado en el perfil del miembro');}
-const result=document.getElementById('aiNutriResult');result.innerHTML=formatAIResponse(resp)+(midNutri?'<div class="alert alert-ok" style="margin-top:10px">✅ Plan guardado en el perfil del miembro</div>':'');result.classList.add('show');}catch(e){handleAIError(e,'aiNutriResult');}
-setBtnLoading(btn,false,'⚡ Generar Plan');}
-async function analizarNegocio(){const btn=document.getElementById('btnAnalisis');setBtnLoading(btn,true,'⚡ Analizar');document.getElementById('aiAnalisisResult').classList.remove('show');try{const hoyStr=hoy();const mesStr=hoyStr.slice(0,7);const activos=miembros.filter(m=>statusMiembro(m).cls==='badge-active').length;const vencidos=miembros.filter(m=>statusMiembro(m).cls==='badge-exp').length;const porVencer=miembros.filter(m=>statusMiembro(m).cls==='badge-warn').length;const ingresosMes=pagos.filter(p=>p.fecha?.startsWith(mesStr)).reduce((s,p)=>s+(p.valor||0),0);const asistSemana=asistencia.filter(a=>{const d=new Date(a.fecha);const h=new Date();return(h-d)<7*86400000;}).length;const planes={};miembros.forEach(m=>{planes[m.plan]=(planes[m.plan]||0)+1;});const planTop=Object.entries(planes).sort((a,b)=>b[1]-a[1])[0]?.[0]||'N/A';const resp=await callAI([{role:'system',content:'Eres un consultor de negocios para gimnasios. Analiza los datos y da recomendaciones concretas y accionables en español.'},{role:'user',content:`Analiza estos datos de mi gimnasio"${cfg.gym||'Gym'}":📊 MEMBRESÍAS:-Total miembros:${miembros.length}
--Activos:${activos}|Por vencer:${porVencer}|Vencidos:${vencidos}
--Plan más popular:${planTop}
--Tasa de retención:${miembros.length>0?Math.round(activos/miembros.length*100):0}%💰 FINANZAS:-Ingresos del mes:$${ingresosMes.toLocaleString('es-CO')}COP
--Total pagos registrados:${pagos.length}
-✅ ASISTENCIA:-Visitas esta semana:${asistSemana}
--Total registros:${asistencia.length}
-Dame:1.Diagnóstico del estado actual del negocio
-2.Los 3 problemas principales que detectas
-3.Las 3 acciones concretas más importantes para mejorar
-4.Una proyección optimista si implementan las mejoras`}],1500);const result=document.getElementById('aiAnalisisResult');result.innerHTML=formatAIResponse(resp);result.classList.add('show');}catch(e){handleAIError(e,'aiAnalisisResult');}
-setBtnLoading(btn,false,'⚡ Analizar ahora');}
-function renderChatHTML(){const m=getMiembro();const nombre=m?m.nombre:'Cliente';const plan=m?m.plan:'';const dias=m?diasRestantes(m):0;return`<div class="ai-panel"style="flex:1;min-height:0"><div style="display:flex;align-items:center;justify-content:space-between"><div><div class="ai-badge">🤖 IA</div><div class="ai-title">Entrenador Personal IA</div><div class="ai-desc">Pregúntame sobre ejercicios,nutrición,técnica o cualquier duda del gym.</div></div><button class="btn-xs btn-xs-outline"onclick="limpiarChat()">🗑 Limpiar</button></div><div class="chat-messages"id="chatMessages"><div class="chat-msg"><div class="chat-avatar chat-bot-av">🤖</div><div class="chat-bubble bot">¡Hola<strong>${nombre}</strong>!💪 Soy tu entrenador IA.Puedo ayudarte con ejercicios,técnica,nutrición y más.¿Qué necesitas hoy?</div></div></div><div class="chat-typing"id="chatTyping"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><div class="chat-input-row"><input class="chat-input"id="chatInput"placeholder="Escribe tu pregunta..."onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarChat()}"><button class="btn btn-lime"onclick="enviarChat()"style="padding:9px 16px;white-space:nowrap">Enviar</button></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><button class="btn btn-outline"style="font-size:11px;justify-content:center"onclick="chatQuick('¿Cómo hago sentadillas correctamente?')">🏋️ Técnica sentadilla</button><button class="btn btn-outline"style="font-size:11px;justify-content:center"onclick="chatQuick('Dame consejos de nutrición para ${plan||'mejorar mi físico'}')">🥗 Consejos nutrición</button><button class="btn btn-outline"style="font-size:11px;justify-content:center"onclick="chatQuick('Tengo ${dias} días de membresía. ¿Qué debería hacer para aprovecharlos al máximo?')">💡 Aprovechar membresía</button><button class="btn btn-outline"style="font-size:11px;justify-content:center"onclick="chatQuick('¿Qué ejercicio me recomiendas para calentar antes de entrenar?')">🔥 Calentamiento</button></div>`;}
-async function enviarChat(){const input=document.getElementById('chatInput');const msg=input.value.trim();if(!msg)return;input.value='';agregarMsgChat('user',msg);chatHistory.push({role:'user',content:msg});await responderChat();}
-function chatQuick(msg){document.getElementById('chatInput').value=msg;enviarChat();}
-function limpiarChat(){chatHistory=[];renderTab('chat');}
-async function responderChat(){const typing=document.getElementById('chatTyping');typing.classList.add('show');const m=getMiembro();const contexto=m?`El cliente se llama ${m.nombre},tiene plan ${m.plan||'básico'}y le quedan ${diasRestantes(m)}días de membresía.`:'';try{const messages=[{role:'system',content:`Eres un entrenador personal y nutricionista experto en un gimnasio llamado"${cfg.gym||'SiryX Gym'}".Responde siempre en español,de forma amigable,motivadora y concisa(máximo 3-4 párrafos).${contexto}
-Si preguntan sobre ejercicios,incluye consejos de técnica.Si preguntan sobre nutrición,sé práctico.Usa emojis ocasionalmente para ser más amigable.`},...chatHistory.slice(-8)];const resp=await callAI(messages,800);chatHistory.push({role:'assistant',content:resp});agregarMsgChat('bot',resp);}catch(e){if(e.message==='NO_KEY')agregarMsgChat('bot','⚙️ El administrador necesita configurar la API Key de IA para activar el chat.');else agregarMsgChat('bot','Disculpa, tuve un problema al responder. Intenta de nuevo.');}
-typing.classList.remove('show');}
-function agregarMsgChat(tipo,texto){const msgs=document.getElementById('chatMessages');if(!msgs)return;const div=document.createElement('div');div.className=`chat-msg ${tipo}`;div.innerHTML=`<div class="chat-avatar ${tipo==='bot'?'chat-bot-av':'chat-user-av'}">${tipo==='bot'?'🤖':'👤'}</div><div class="chat-bubble ${tipo}">${tipo==='bot'?formatAIResponse(texto):texto}</div>`;msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;}
-function setBtnLoading(btn,loading,originalText){if(loading){btn.innerHTML=`<span class="btn-spin"></span>Generando...`;btn.classList.add('btn-loading');btn.disabled=true;}else{btn.innerHTML=originalText;btn.classList.remove('btn-loading');btn.disabled=false;}}
-function handleAIError(e,resultId){const el=document.getElementById(resultId);if(!el)return;if(e.message==='NO_KEY'){el.innerHTML=noKeyMsg();}
-else if(e.message?.includes('401')){el.innerHTML='<div class="alert alert-red">❌ API Key inválida. Verifica en ⚙ Configuración.</div>';}
-else{el.innerHTML=`<div class="alert alert-red">❌ Error:${e.message}</div>`;}
-el.classList.add('show');}
-function renderMiProgresoHTML(){const m=getMiembro();if(!m)return'';const key='sg_progreso_'+m.id;const registros=JSON.parse(localStorage.getItem(key)||'[]');const hoyStr=hoy();const form=`<div class="card"><div class="card-title">📏 Registrar medidas de hoy</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px"><div class="f-field"><label>Peso(kg)</label><input class="f-input"id="ppeso"type="number"step="0.1"placeholder="75.5"></div><div class="f-field"><label>Cintura(cm)</label><input class="f-input"id="pcintura"type="number"placeholder="85"></div><div class="f-field"><label>Cadera(cm)</label><input class="f-input"id="pcadera"type="number"placeholder="95"></div><div class="f-field"><label>Pecho(cm)</label><input class="f-input"id="ppecho"type="number"placeholder="100"></div></div><div class="f-field"><label>Nota(opcional)</label><input class="f-input"id="pnota"placeholder="Cómo me sentí hoy..."></div><button class="btn btn-lime"onclick="guardarProgreso('${m.id}')"style="width:100%">💾 Guardar medidas</button></div>`;const hist=registros.slice().reverse().slice(0,10);const histHTML=hist.length?hist.map((r,i)=>{const prev=hist[i+1];const diff=prev?((r.peso-prev.peso)>0?'+':'')+(r.peso-prev.peso).toFixed(1)+'kg':'';const cls=diff?diff.startsWith('+')?'up':'down':'eq';return`<div class="prog-entry"><div><div class="prog-fecha">${fmtF(r.fecha)}</div>${r.nota?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${r.nota}</div>`:''}</div><div style="text-align:right"><div class="prog-val">${r.peso||'—'}kg</div>${diff?`<div class="prog-diff ${cls}"style="font-size:11px;font-family:var(--mono)">${diff}</div>`:''}</div></div>`;}).join(''):'<div style="color:var(--muted);font-size:12px;padding:10px">Sin registros aún</div>';const chartHTML=registros.length>=2?`<div class="card"><div class="card-title">📈 Evolución del peso</div><div style="position:relative;height:180px"><canvas id="chartPeso"></canvas></div></div>`:'';setTimeout(()=>{if(registros.length>=2){const dark=document.documentElement.getAttribute('data-theme')==='dark';const txt=dark?'#5a5a78':'#8888a8';const grid=dark?'rgba(255,255,255,.05)':'rgba(0,0,0,.05)';const cv=document.getElementById('chartPeso');if(cv)new Chart(cv,{type:'line',data:{labels:registros.slice(-12).map(r=>r.fecha.slice(5)),datasets:[{data:registros.slice(-12).map(r=>r.peso),borderColor:'#0066FF',backgroundColor:'rgba(0,102,255,.08)',tension:.4,fill:true,pointRadius:4,pointBackgroundColor:'#0066FF'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:txt,font:{size:9}},grid:{color:grid}},y:{ticks:{color:txt,font:{size:9}},grid:{color:grid},beginAtZero:false}}}});}},100);return form+chartHTML+`<div class="card"><div class="card-title">📋 Historial de medidas</div><div style="display:flex;flex-direction:column;gap:6px">${histHTML}</div></div>`;}
-function guardarProgreso(miembroId){const peso=parseFloat(document.getElementById('ppeso').value)||0;const cintura=parseFloat(document.getElementById('pcintura').value)||0;const cadera=parseFloat(document.getElementById('pcadera').value)||0;const pecho=parseFloat(document.getElementById('ppecho').value)||0;const nota=document.getElementById('pnota').value.trim();if(!peso){toast('❌ Ingresa al menos el peso');return;}
-const key='sg_progreso_'+miembroId;const registros=JSON.parse(localStorage.getItem(key)||'[]');registros.push({fecha:hoy(),peso,cintura,cadera,pecho,nota});localStorage.setItem(key,JSON.stringify(registros));verificarLogros(miembroId);renderTab('miprogreso');toast('✅ Medidas guardadas');}
-function renderMiNutricionHTML(){const m=getMiembro();if(!m)return'';const key='sg_nutri_'+m.id;const plan=JSON.parse(localStorage.getItem(key)||'null');if(!plan)return`<div class="card"><div class="card-title">🍽 Mi Plan Nutricional</div><div class="alert alert-info">Tu entrenador aún no ha generado tu plan nutricional.Solicítalo en el gym.</div></div>`;const comidas=[{icon:'🌅',nombre:'Desayuno',key:'desayuno'},{icon:'🍎',nombre:'Merienda AM',key:'meriendam'},{icon:'☀️',nombre:'Almuerzo',key:'almuerzo'},{icon:'🍊',nombre:'Merienda PM',key:'meriendam2'},{icon:'🌙',nombre:'Cena',key:'cena'},];const macrosHTML=plan.macros?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px"><span class="macro-pill mp-cal">🔥 ${plan.macros.calorias||'—'}kcal</span><span class="macro-pill mp-prot">💪 ${plan.macros.proteinas||'—'}g prot</span><span class="macro-pill mp-carb">⚡ ${plan.macros.carbos||'—'}g carbs</span><span class="macro-pill mp-fat">💧 ${plan.macros.grasas||'—'}g grasas</span></div>`:'';const comidasHTML=comidas.map(cm=>`<div class="nutri-meal"><div class="nutri-meal-header"onclick="this.nextElementSibling.classList.toggle('open')"><span class="nutri-meal-icon">${cm.icon}</span><span class="nutri-meal-name">${cm.nombre}</span><span style="margin-left:auto;color:var(--muted);font-size:12px">▼</span></div><div class="nutri-meal-body">${plan[cm.key]||'Sin especificar aún'}</div></div>`).join('');return`<div class="card"><div class="card-title">🍽 Mi Plan Nutricional<span style="font-size:10px">IA ✨</span></div>${macrosHTML}<div style="font-size:11px;color:var(--muted);margin-bottom:8px">Objetivo:${plan.objetivo||'—'}· Generado:${plan.fecha?fmtF(plan.fecha):'—'}</div>${comidasHTML}
-${plan.consejos?`<div class="alert alert-info"style="margin-top:8px">💡 ${plan.consejos}</div>`:''}</div>`;}
-const LOGROS_DEF=[{id:'primera_visita',icon:'🌟',nombre:'Primera visita',desc:'Completaste tu primer check-in',req:1,tipo:'asistencia'},{id:'semana_completa',icon:'🔥',nombre:'Semana de fuego',desc:'7 días consecutivos asistiendo',req:7,tipo:'racha'},{id:'mes_activo',icon:'💪',nombre:'Mes activo',desc:'20+ visitas en un mes',req:20,tipo:'mes'},{id:'50_visitas',icon:'🏅',nombre:'50 visitas',desc:'Alcanzaste 50 asistencias totales',req:50,tipo:'total_asist'},{id:'100_visitas',icon:'🥇',nombre:'Centurión',desc:'100 visitas al gym — ¡leyenda!',req:100,tipo:'total_asist'},{id:'primer_peso',icon:'📊',nombre:'Primer registro',desc:'Registraste tus primeras medidas',req:1,tipo:'progreso'},{id:'baja_peso',icon:'⚖️',nombre:'En forma',desc:'Bajaste de peso respecto al inicio',req:1,tipo:'baja_peso'},{id:'rutina_asignada',icon:'📋',nombre:'Plan en mano',desc:'Tienes una rutina asignada',req:1,tipo:'rutina'},{id:'nutri_activa',icon:'🥗',nombre:'Nutrición activa',desc:'Tienes plan nutricional activo',req:1,tipo:'nutri'},{id:'3_meses',icon:'🦁',nombre:'Constancia de León',desc:'3 meses siendo miembro del gym',req:90,tipo:'dias_miembro'},];function calcularLogros(miembroId){const m=miembros.find(m=>m.id===miembroId);if(!m)return[];const asistM=asistencia.filter(a=>a.miembroId===miembroId);const progKey='sg_progreso_'+miembroId;const prog=JSON.parse(localStorage.getItem(progKey)||'[]');const nutri=JSON.parse(localStorage.getItem('sg_nutri_'+miembroId)||'null');const rutina=rutinas.find(r=>r.miembroId===miembroId);const diasMiembro=m.fechaInicio?Math.floor((new Date()-new Date(m.fechaInicio))/(86400000)):0;let racha=0,fechaSet=new Set(asistM.map(a=>a.fecha));for(let d=0;d<365;d++){const dd=new Date();dd.setDate(dd.getDate()-d);if(fechaSet.has(dd.toISOString().slice(0,10)))racha++;else break;}
-const mesStr=hoy().slice(0,7);const visitasMes=asistM.filter(a=>a.fecha?.startsWith(mesStr)).length;const bajoPeso=prog.length>=2&&prog[prog.length-1].peso<prog[0].peso;const earned=[];LOGROS_DEF.forEach(l=>{let ok=false;if(l.tipo==='asistencia')ok=asistM.length>=l.req;else if(l.tipo==='racha')ok=racha>=l.req;else if(l.tipo==='mes')ok=visitasMes>=l.req;else if(l.tipo==='total_asist')ok=asistM.length>=l.req;else if(l.tipo==='progreso')ok=prog.length>=l.req;else if(l.tipo==='baja_peso')ok=bajoPeso;else if(l.tipo==='rutina')ok=!!rutina;else if(l.tipo==='nutri')ok=!!nutri;else if(l.tipo==='dias_miembro')ok=diasMiembro>=l.req;earned.push({...l,earned:ok});});return earned;}
-function verificarLogros(miembroId){const logros=calcularLogros(miembroId);const key='sg_logros_'+miembroId;const prev=JSON.parse(localStorage.getItem(key)||'[]');const prevIds=new Set(prev);const nuevos=logros.filter(l=>l.earned&&!prevIds.has(l.id));if(nuevos.length){localStorage.setItem(key,JSON.stringify(logros.filter(l=>l.earned).map(l=>l.id)));nuevos.forEach(l=>toast(`🏆 ¡Nuevo logro!${l.icon}${l.nombre}`));}}
-function renderMiLogrosHTML(){const m=getMiembro();if(!m)return'';const logros=calcularLogros(m.id);const earned=logros.filter(l=>l.earned).length;const grid=logros.map(l=>`<div class="logro-card ${l.earned?'earned':'locked'}">${l.earned?'<span class="logro-badge new">✓</span>':''}<div class="logro-icon">${l.icon}</div><div class="logro-nombre">${l.nombre}</div><div class="logro-desc">${l.desc}</div></div>`).join('');return`<div class="card"style="background:linear-gradient(135deg,var(--s1),var(--s2))"><div style="display:flex;align-items:center;gap:12px"><div style="font-size:36px">🏆</div><div><div style="font-family:'Oswald',sans-serif;font-size:22px;letter-spacing:1px">${earned}/${logros.length}LOGROS</div><div style="font-size:12px;color:var(--muted)">Sigue entrenando para desbloquear más</div></div></div><div style="background:var(--s2);border-radius:4px;height:8px;overflow:hidden"><div style="width:${Math.round(earned/logros.length*100)}%;height:100%;background:var(--accent);border-radius:0;transition:width .5s"></div></div></div><div class="logros-grid">${grid}</div>`;}
-function renderMiClasesHTML(){const m=getMiembro();if(!m)return'';const clases=JSON.parse(localStorage.getItem('sg_clases')||'[]');const reservas=JSON.parse(localStorage.getItem('sg_reservas_'+m.id)||'[]');if(!clases.length)return`<div class="card"><div class="card-title">📅 Clases Grupales</div><div class="alert alert-info">El administrador aún no ha programado clases.Consulta en recepción.</div></div>`;const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];const hoyDia=new Date().getDay();const clasesHTML=clases.map(cl=>{const reservado=reservas.includes(cl.id);const lleno=cl.capacidad>0&&(cl.inscritos||0)>=cl.capacidad;return`<div class="clase-card ${reservado?'reservado':''}"><div class="clase-hora">${cl.hora}</div><div class="clase-info"><div class="clase-nombre">${cl.nombre}</div><div class="clase-detalle">${cl.instructor||'Instructor'}· ${cl.duracion||60}min · ${dias[cl.dia]||'—'}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="clase-spots">${cl.capacidad>0?`${cl.inscritos||0}/${cl.capacidad}`:'Libre'}</span>${!lleno||reservado?`<button class="btn-xs ${reservado?'btn-xs-outline':'btn-xs-lime'}"onclick="toggleReserva('${m.id}','${cl.id}')">${reservado?'✓ Reservado':'+ Reservar'}</button>`:'<span style="font-size:10px;color:var(--red)">Lleno</span>'}</div></div>`;}).join('');return`<div class="card"><div class="card-title">📅 Clases Grupales</div><div style="display:flex;flex-direction:column;gap:8px">${clasesHTML}</div></div>`;}
-function toggleReserva(miembroId,claseId){const key='sg_reservas_'+miembroId;const reservas=JSON.parse(localStorage.getItem(key)||'[]');const clases=JSON.parse(localStorage.getItem('sg_clases')||'[]');const idx=reservas.indexOf(claseId);const cl=clases.find(c=>c.id===claseId);if(idx>=0){reservas.splice(idx,1);if(cl&&cl.inscritos>0)cl.inscritos--;toast('↩ Reserva cancelada');}else{reservas.push(claseId);if(cl)cl.inscritos=(cl.inscritos||0)+1;toast(`✅ Reservado:${cl?.nombre||'clase'}`);}
-localStorage.setItem(key,JSON.stringify(reservas));localStorage.setItem('sg_clases',JSON.stringify(clases));renderTab('misclases');}
-function renderClasesAdminHTML(){const clases=JSON.parse(localStorage.getItem('sg_clases')||'[]');const dias=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];return`<div style="display:flex;justify-content:flex-end;margin-bottom:4px"><button class="btn btn-lime"onclick="openModalClase()">+Nueva clase</button></div><div style="display:flex;flex-direction:column;gap:8px">${clases.map((cl,i)=>`<div class="clase-card"><div class="clase-hora">${cl.hora}</div><div class="clase-info"><div class="clase-nombre">${cl.nombre}</div><div class="clase-detalle">${dias[cl.dia]||'—'}· ${cl.instructor||'—'}· ${cl.duracion||60}min</div></div><div style="display:flex;gap:5px"><span class="clase-spots">${cl.inscritos||0}/${cl.capacidad>0?cl.capacidad:'∞'}</span><button class="btn-xs btn-xs-red"onclick="eliminarClase(${i})">🗑</button></div></div>`).join('')||'<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">Sin clases programadas</div>'}</div>`;}
-function openModalClase(){const nombre=prompt('Nombre de la clase (ej: Spinning, Yoga, Funcional):');if(!nombre)return;const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];const diaStr=prompt('Día (0=Dom, 1=Lun, 2=Mar, 3=Mié, 4=Jue, 5=Vie, 6=Sáb):','1');const hora=prompt('Hora (ej: 06:00 AM):','07:00 AM');const instructor=prompt('Instructor:','');const duracion=prompt('Duración en minutos:','60');const capacidad=prompt('Capacidad máxima (0 = sin límite):','20');const clases=JSON.parse(localStorage.getItem('sg_clases')||'[]');clases.push({id:'cl'+Date.now(),nombre,dia:parseInt(diaStr)||1,hora,instructor,duracion:parseInt(duracion)||60,capacidad:parseInt(capacidad)||0,inscritos:0});localStorage.setItem('sg_clases',JSON.stringify(clases));renderTab('misclases');toast('✅ Clase agregada');}
-function eliminarClase(idx){if(!confirm('¿Eliminar esta clase?'))return;const clases=JSON.parse(localStorage.getItem('sg_clases')||'[]');clases.splice(idx,1);localStorage.setItem('sg_clases',JSON.stringify(clases));renderTab('misclases');}
-function renderMensajesHTML(){const mensajes=JSON.parse(localStorage.getItem('sg_mensajes')||'[]');const esAdmin=rol==='admin'||rol==='trainer';const miembro=getMiembro();const lista=mensajes.slice().reverse().slice(0,20).map(msg=>`<div class="msg-card"><div class="msg-header"><span class="msg-from">👤 ${msg.para||'Todos'}· 💬 ${msg.de||'Entrenador'}</span><div style="display:flex;align-items:center;gap:6px">${msg.nuevo?'<span class="msg-nuevo">NUEVO</span>':''}<span class="msg-time">${msg.fecha||''}</span></div></div><div class="msg-text">${msg.texto}</div></div>`).join('')||'<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">Sin mensajes aún</div>';if(esAdmin){const miembrosOpts=`<option value="Todos">📢 Todos los miembros</option>`+miembros.map(m=>`<option value="${m.nombre}">${m.nombre}</option>`).join('');return`<div class="card"><div class="card-title">💬 Nuevo mensaje</div><div class="f-field"><label>Para</label><select class="f-input"id="msgPara">${miembrosOpts}</select></div><div class="f-field"><label>Mensaje</label><textarea class="msg-compose"id="msgTexto"placeholder="Escribe una nota de motivación, indicación o recordatorio..."></textarea></div><button class="btn btn-lime"onclick="enviarMensajeAdmin()"style="width:100%">📤 Enviar mensaje</button></div><div class="card"><div class="card-title">📋 Mensajes enviados</div><div style="display:flex;flex-direction:column;gap:8px">${lista}</div></div>`;}
-const msgsCliente=mensajes.filter(m=>m.para==='Todos'||(miembro&&m.para===miembro.nombre));const listaC=msgsCliente.slice().reverse().slice(0,10).map(msg=>`<div class="msg-card"><div class="msg-header"><span class="msg-from">💬 ${msg.de||'Tu entrenador'}</span><div style="display:flex;align-items:center;gap:6px">${msg.nuevo?'<span class="msg-nuevo">NUEVO</span>':''}<span class="msg-time">${msg.fecha||''}</span></div></div><div class="msg-text">${msg.texto}</div></div>`).join('')||'<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">Sin mensajes aún</div>';return`<div class="card"><div class="card-title">💬 Mensajes de tu entrenador</div><div style="display:flex;flex-direction:column;gap:8px">${listaC}</div></div>`;}
-function enviarMensajeAdmin(){const para=document.getElementById('msgPara').value;const texto=document.getElementById('msgTexto').value.trim();if(!texto){toast('❌ Escribe el mensaje');return;}
-const mensajes=JSON.parse(localStorage.getItem('sg_mensajes')||'[]');mensajes.push({id:'ms'+Date.now(),de:cfg.gym||'Entrenador',para,texto,fecha:new Date().toLocaleString('es-CO',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}),nuevo:true});localStorage.setItem('sg_mensajes',JSON.stringify(mensajes));document.getElementById('msgTexto').value='';renderTab('mensajes');toast(`✅ Mensaje enviado a ${para}`);}
-function extraerSeccion(texto,keyword){const lines=texto.split('\n');let capturando=false;const result=[];for(const l of lines){if(new RegExp(keyword,'i').test(l)){capturando=true;continue;}
-if(capturando){if(/^\*\*|^#{1,3}\s/.test(l)&&result.length>0)break;if(l.trim())result.push(l.trim());}}
-return result.slice(0,6).join('<br>')||'Ver plan completo arriba';}
-function seleccionarColor(hex,presetEl){const prev=document.getElementById('cfgColorPreview');const hexEl=document.getElementById('cfgColorHex');const picker=document.getElementById('cfgColorCustom');if(prev)prev.style.background=hex;if(hexEl)hexEl.textContent=hex.toUpperCase();if(picker)picker.value=hex;document.querySelectorAll('.color-preset').forEach(p=>p.classList.remove('selected'));if(presetEl)presetEl.classList.add('selected');aplicarColor(hex);}
-function aplicarColor(hex){const r=parseInt(hex.slice(1,3),16);const g=parseInt(hex.slice(3,5),16);const b=parseInt(hex.slice(5,7),16);const lighter=`rgb(${Math.min(255,r+50)},${Math.min(255,g+50)},${Math.min(255,b+50)})`;const darker=`rgb(${Math.max(0,r-30)},${Math.max(0,g-30)},${Math.max(0,b-30)})`;const root=document.documentElement;root.style.setProperty('--accent',hex);root.style.setProperty('--accent2',lighter);root.style.setProperty('--accentd',darker);root.style.setProperty('--blue',hex);}
-function initColorPicker(){const color=cfg.accentColor||'#0066FF';aplicarColor(color);setTimeout(()=>{document.querySelectorAll('.color-preset').forEach(p=>{if(p.dataset.color===color)p.classList.add('selected');});const picker=document.getElementById('cfgColorCustom');const hexEl=document.getElementById('cfgColorHex');const prev=document.getElementById('cfgColorPreview');if(picker)picker.value=color;if(hexEl)hexEl.textContent=color.toUpperCase();if(prev)prev.style.background=color;},100);}
-applyTheme();function generarFingerprint(){const nav=window.navigator;const screen=window.screen;const datos=[nav.userAgent,nav.language,screen.colorDepth,screen.width+'x'+screen.height,new Date().getTimezoneOffset(),nav.hardwareConcurrency||0,nav.platform||''].join('|');let hash=0;for(let i=0;i<datos.length;i++){hash=((hash<<5)-hash)+datos.charCodeAt(i);hash=hash&hash;}
-return Math.abs(hash).toString(36).toUpperCase().slice(0,8);}
-function verificarFingerprint(){const fp=generarFingerprint();const lic=JSON.parse(localStorage.getItem('sg_lic')||'{}');if(lic.activa&&lic.fingerprint&&lic.fingerprint!==fp){localStorage.removeItem('sg_lic');console.warn('SiryX: Dispositivo diferente detectado, reactivación requerida');}
-return fp;}
-const _fpOriginalActivar=window.activar;verificarFingerprint();if(window.SIRYX_CONFIG){if(window.SIRYX_CONFIG.groqKey&&!cfg.groqKey){cfg.groqKey=window.SIRYX_CONFIG.groqKey;}}
-if(cfg.accentColor)aplicarColor(cfg.accentColor);const splashName=document.getElementById('splashGymName');if(splashName)splashName.textContent=cfg.gym?cfg.gym.toUpperCase():'SIRYX GYM';setTimeout(()=>{document.getElementById('splash').classList.add('out');setTimeout(()=>document.getElementById('splash').style.display='none',600);iniciarApp();},2200);
+// ══════════════════════════════════════════
+//  ESTADO GLOBAL
+// ══════════════════════════════════════════
+let miembros   = JSON.parse(localStorage.getItem('sg_miembros')  ||'[]');
+let rutinas    = JSON.parse(localStorage.getItem('sg_rutinas')   ||'[]');
+let asistencia = JSON.parse(localStorage.getItem('sg_asistencia')||'[]');
+let pagos      = JSON.parse(localStorage.getItem('sg_pagos')     ||'[]');
+let cfg        = JSON.parse(localStorage.getItem('sg_cfg')       ||'{}');
+let lic        = JSON.parse(localStorage.getItem('sg_lic')       ||'{}');
+
+let rol = cfg.rol||'admin';
+let clienteActivo = cfg.clienteActivo||null; // ID del miembro cuando rol=client
+let charts = {};
+
+const PLANES_DEFAULT = {mensual:80000,trimestral:220000,semestral:400000,anual:720000,diario:8000};
+const DURACIONES = {mensual:30,trimestral:90,semestral:180,anual:365,diario:1};
+const AV_COLORS = ['av-lime','av-blue','av-green','av-red','av-orange','av-purple'];
+
+function save(){
+  localStorage.setItem('sg_miembros',   JSON.stringify(miembros));
+  localStorage.setItem('sg_rutinas',    JSON.stringify(rutinas));
+  localStorage.setItem('sg_asistencia', JSON.stringify(asistencia));
+  localStorage.setItem('sg_pagos',      JSON.stringify(pagos));
+  localStorage.setItem('sg_cfg',        JSON.stringify(cfg));
+}
+
+function fmt(n){ return '$'+Number(n||0).toLocaleString('es-CO'); }
+function fmtF(d){ return new Date(d+'T12:00:00').toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'}); }
+function hoy(){ return new Date().toISOString().slice(0,10); }
+function diasRestantes(m){
+  if(!m.fechaFin) return 0;
+  return Math.ceil((new Date(m.fechaFin+' 23:59:59')-new Date())/(1000*60*60*24));
+}
+function statusMiembro(m){
+  const dias=diasRestantes(m);
+  if(!m.fechaFin||!m.activo) return {label:'Sin membresía',cls:'badge-frozen',dias:0};
+  if(dias>5) return {label:`${dias}d restantes`,cls:'badge-active',dias};
+  if(dias>0) return {label:`⚠ Vence en ${dias}d`,cls:'badge-warn',dias};
+  return {label:'Vencido',cls:'badge-exp',dias};
+}
+function initiales(nombre){ return nombre.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
+function avColor(i){ return AV_COLORS[i%AV_COLORS.length]; }
+
+// ══ TOAST ══
+function toast(msg,ms=2500){
+  const t=document.getElementById('toastEl');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),ms);
+}
+
+// ══ RELOJ ══
+setInterval(()=>{
+  const n=new Date();
+  document.getElementById('clockEl').textContent=
+    `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+},1000);
+
+// ══ TEMA ══
+function toggleTheme(){
+  const h=document.documentElement;
+  const d=h.getAttribute('data-theme')==='dark';
+  h.setAttribute('data-theme',d?'light':'dark');
+  const btn=document.getElementById('themeBtn');
+  if(btn) btn.textContent=d?'🌙':'☀️';
+  localStorage.setItem('sg_theme',d?'light':'dark');
+  renderDashboard();
+}
+function applyTheme(){
+  const t=localStorage.getItem('sg_theme')||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  const btn=document.getElementById('themeBtn');
+  if(btn) btn.textContent=t==='dark'?'🌙':'☀️';
+}
+
+// ══════════════════════════════════════════
+//  LICENCIA
+// ══════════════════════════════════════════
+const LIC_SECRET='SiryX2024$Connect#';
+function hashL(s){let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h)^s.charCodeAt(i);return Math.abs(h);}
+function decodeKey(key,cid){
+  try{
+    const p=key.trim().toUpperCase().split('-');
+    if(p.length!==3) return null;
+    const dI=parseInt(p[0],36),dF=parseInt(p[1],36),ck=p[2];
+    const seed=`${LIC_SECRET}|${cid.toLowerCase().trim()}|${dI}|${dF}`;
+    const exp=('000'+(hashL(seed)%9999+1000)).slice(-4);
+    if(ck!==exp) return null;
+    return{fi:new Date(dI*86400000).toISOString().slice(0,10),ff:new Date(dF*86400000).toISOString().slice(0,10)};
+  }catch(e){return null;}
+}
+function checkLic(){
+  if(!lic.activa||!lic.ff) return false;
+  const g=new Date(lic.ff+'T23:59:59');g.setDate(g.getDate()+2);
+  return new Date()<=g;
+}
+function activar(){
+  const cid=document.getElementById('actId').value.trim().toLowerCase();
+  const key=document.getElementById('actKey').value.trim().toUpperCase();
+  const err=document.getElementById('actErr');
+  err.textContent='';
+  if(!cid){err.textContent='Ingresa el ID de cliente';return;}
+  if(!key){err.textContent='Ingresa la clave';return;}
+  const dec=decodeKey(key,cid);
+  if(!dec){err.textContent='Clave incorrecta. Verifica con SiryX Connect.';document.getElementById('actKey').value='';return;}
+  const ff=new Date(dec.ff+'T23:59:59');
+  const g=new Date(ff);g.setDate(g.getDate()+2);
+  if(new Date()>g){err.textContent='Esta clave ya venció. Solicita la nueva.';return;}
+  lic={activa:true,cid,fi:dec.fi,ff:dec.ff,activado:new Date().toISOString()};
+  localStorage.setItem('sg_lic',JSON.stringify(lic));
+  document.getElementById('actScreen').classList.remove('show');
+  iniciarApp();
+  toast(`✅ Licencia activa hasta ${fmtF(dec.ff)}`);
+}
+
+// ══════════════════════════════════════════
+//  RENDER PRINCIPAL
+// ══════════════════════════════════════════
+function iniciarApp(){
+  applyTheme();
+  if(cfg.accentColor) aplicarColor(cfg.accentColor);
+  cfg.rol=cfg.rol||'admin';
+  rol=cfg.rol;
+  actualizarHeaderLogo();
+  renderTabs();
+}
+
+function renderTabs(){
+  const nav=document.getElementById('tabsNav');
+  const main=document.getElementById('mainContent');
+  const badge=miembros.filter(m=>statusMiembro(m).cls==='badge-exp'||statusMiembro(m).cls==='badge-warn').length;
+  const badgeStr=badge?`<span class="tab-badge">${badge}</span>`:'';
+
+  let tabs=[];
+  if(rol==='admin'){
+    tabs=[
+      {id:'dashboard',icon:'📊',label:'Dashboard'},
+      {id:'miembros',icon:'👥',label:`Miembros${badgeStr}`},
+      {id:'asistencia',icon:'✅',label:'Asistencia'},
+      {id:'rutinas',icon:'🏋️',label:'Rutinas'},
+      {id:'pagos',icon:'💰',label:'Pagos'},
+      {id:'ia',icon:'🤖',label:'IA'},
+      {id:'clases',icon:'📅',label:'Clases'},
+      {id:'mensajes',icon:'💬',label:'Mensajes'},
+    ];
+    document.getElementById('roleBadge').textContent='Admin';
+    document.getElementById('roleBadge').className='role-badge role-admin';
+  } else if(rol==='trainer'){
+    tabs=[
+      {id:'asistencia',icon:'✅',label:'Asistencia'},
+      {id:'miembros',icon:'👥',label:'Miembros'},
+      {id:'rutinas',icon:'🏋️',label:'Rutinas'},
+      {id:'ia',icon:'🤖',label:'IA'},
+      {id:'clases',icon:'📅',label:'Clases'},
+      {id:'mensajes',icon:'💬',label:'Mensajes'},
+    ];
+    document.getElementById('roleBadge').textContent='Entrenador';
+    document.getElementById('roleBadge').className='role-badge role-trainer';
+  } else {
+    tabs=[
+      {id:'mionboarding', icon:'🎯', label:'Mi Plan'},
+      {id:'micliente',    icon:'👤', label:'Membresía'},
+      {id:'miprogreso',   icon:'📊', label:'Progreso'},
+      {id:'mirutina',     icon:'🏋️', label:'Rutina'},
+      {id:'minutricion',  icon:'🍽', label:'Nutrición'},
+      {id:'milogros',     icon:'🏆', label:'Logros'},
+      {id:'misclases',    icon:'📅', label:'Clases'},
+      {id:'micoach',      icon:'🤖', label:'Mi Coach'},
+    ];
+    document.getElementById('roleBadge').textContent='Cliente';
+    document.getElementById('roleBadge').className='role-badge role-client';
+  }
+
+  nav.innerHTML=tabs.map((t,i)=>`<button class="tab-btn${i===0?' active':''}" onclick="switchTab('${t.id}',this)">${t.icon} ${t.label}</button>`).join('');
+  renderTab(tabs[0].id);
+}
+
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTab(id);
+}
+
+function renderTab(id){
+  const main=document.getElementById('mainContent');
+  // Destruir charts existentes
+  Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}});
+  charts={};
+
+  const html = {
+    dashboard:    renderDashboardHTML,
+    miembros:     renderMiembrosHTML,
+    asistencia:   renderAsistenciaHTML,
+    rutinas:      renderRutinasHTML,
+    pagos:        renderPagosHTML,
+    ia:           renderIAHTML,
+    chat:         renderChatHTML,
+    mionboarding: renderMiOnboardingHTML,
+    micliente:    renderMiClienteHTML,
+    miprogreso:   renderMiProgresoHTML,
+    mirutina:     renderMiRutinaHTML,
+    minutricion:  renderMiNutricionHTML,
+    milogros:     renderMiLogrosHTML,
+    misclases:    renderMiClasesHTML,
+    miasistencia: renderMiAsistenciaHTML,
+    micoach:      renderMiCoachHTML,
+    mensajes:     renderMensajesHTML,
+  }[id];
+
+  if(html){
+    main.innerHTML=`<div class="tab-content active"><div class="scroll-area">${html()}</div></div>`;
+    if(id==='dashboard') initDashboardCharts();
+  }
+}
+
+// ══════════════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════════════
+function renderDashboardHTML(){
+  const hoyStr=hoy();
+  const mesStr=hoyStr.slice(0,7);
+  const activos=miembros.filter(m=>statusMiembro(m).cls==='badge-active').length;
+  const vencidos=miembros.filter(m=>statusMiembro(m).cls==='badge-exp').length;
+  const porVencer=miembros.filter(m=>statusMiembro(m).cls==='badge-warn').length;
+  const asistHoy=asistencia.filter(a=>a.fecha===hoyStr).length;
+  const pagosHoy=pagos.filter(p=>p.fecha===hoyStr).reduce((s,p)=>s+(p.valor||0),0);
+  const pagosMes=pagos.filter(p=>p.fecha&&p.fecha.startsWith(mesStr)).reduce((s,p)=>s+(p.valor||0),0);
+
+  // Alertas vencidos
+  const alertas=miembros.filter(m=>statusMiembro(m).cls==='badge-exp'||statusMiembro(m).cls==='badge-warn');
+
+  let alertHTML='';
+  if(alertas.length){
+    alertHTML=`<div class="card"><div class="card-title">⚠ Alertas de membresía</div>`+
+      alertas.slice(0,5).map(m=>{
+        const s=statusMiembro(m);
+        return `<div class="alert ${s.cls==='badge-exp'?'alert-red':'alert-warn'}" style="margin-bottom:6px">
+          ${s.cls==='badge-exp'?'❌':'⏰'} <b>${m.nombre}</b> — ${s.label}
+          <button class="btn-xs btn-xs-lime" style="margin-left:auto" onclick="renovarRapido('${m.id}')">Renovar</button>
+        </div>`;
+      }).join('')+'</div>';
+  }
+
+  return `
+  <div class="stats-grid">
+    <div class="stat-card blue"><div class="stat-icon">👥</div><div class="stat-label">Miembros activos</div><div class="stat-val">${activos}</div><div class="stat-sub">de ${miembros.length} total</div></div>
+    <div class="stat-card red"><div class="stat-icon">⚠</div><div class="stat-label">Vencidos/por vencer</div><div class="stat-val">${vencidos+porVencer}</div><div class="stat-sub">${vencidos} venc. · ${porVencer} pronto</div></div>
+    <div class="stat-card green"><div class="stat-icon">✅</div><div class="stat-label">Asistencia hoy</div><div class="stat-val">${asistHoy}</div><div class="stat-sub">personas hoy</div></div>
+    <div class="stat-card blue"><div class="stat-icon">💰</div><div class="stat-label">Ingresos hoy</div><div class="stat-val" style="font-size:16px">${fmt(pagosHoy)}</div><div class="stat-sub">Mes: ${fmt(pagosMes)}</div></div>
+  </div>
+  ${alertHTML}
+  <div class="charts-grid">
+    <div class="chart-box"><div class="chart-label">ASISTENCIA — 7 DÍAS</div><div class="chart-container"><canvas id="chartAsist"></canvas></div></div>
+    <div class="chart-box"><div class="chart-label">ESTADO MEMBRESÍAS</div><div class="chart-container"><canvas id="chartEstado"></canvas></div></div>
+    <div class="chart-box full"><div class="chart-label">INGRESOS — ÚLTIMOS 30 DÍAS</div><div class="chart-container"><canvas id="chartIngresos"></canvas></div></div>
+  </div>`;
+}
+
+function initDashboardCharts(){
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+  const grid=dark?'rgba(255,255,255,.05)':'rgba(0,0,0,.05)';
+  const txt=dark?'#5a5a78':'#8888a8';
+  const hoyStr=hoy();
+
+  // Asistencia 7 días
+  const days7=[];
+  for(let d=6;d>=0;d--){
+    const dd=new Date();dd.setDate(dd.getDate()-d);
+    const lbl=dd.toISOString().slice(0,10);
+    const dn=['Do','Lu','Ma','Mi','Ju','Vi','Sá'][dd.getDay()];
+    days7.push({lbl:dn,cnt:asistencia.filter(a=>a.fecha===lbl).length});
+  }
+  const c1=document.getElementById('chartAsist');
+  if(c1) charts.asist=new Chart(c1,{type:'bar',data:{labels:days7.map(d=>d.lbl),datasets:[{data:days7.map(d=>d.cnt),backgroundColor:'rgba(0,102,255,.3)',borderColor:'#0066FF',borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:txt,font:{size:10}},grid:{color:grid}},y:{ticks:{color:txt,font:{size:10},stepSize:1},grid:{color:grid},beginAtZero:true}}}});
+
+  // Estado membresías dona
+  const activos=miembros.filter(m=>statusMiembro(m).cls==='badge-active').length;
+  const vencidos=miembros.filter(m=>statusMiembro(m).cls==='badge-exp').length;
+  const porVencer=miembros.filter(m=>statusMiembro(m).cls==='badge-warn').length;
+  const sinMemb=miembros.filter(m=>statusMiembro(m).cls==='badge-frozen').length;
+  const c2=document.getElementById('chartEstado');
+  if(c2) charts.estado=new Chart(c2,{type:'doughnut',data:{labels:['Activos','Por vencer','Vencidos','Sin membresía'],datasets:[{data:[activos||0.01,porVencer||0.01,vencidos||0.01,sinMemb||0.01],backgroundColor:['rgba(0,214,143,.7)','rgba(255,140,0,.7)','rgba(255,59,92,.7)','rgba(90,90,120,.4)'],borderColor:'transparent',hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'right',labels:{color:txt,font:{size:10},padding:8,boxWidth:10}}}}});
+
+  // Ingresos 30 días
+  const days30=[];
+  for(let d=29;d>=0;d--){
+    const dd=new Date();dd.setDate(dd.getDate()-d);
+    const lbl=dd.toISOString().slice(0,10);
+    const v=pagos.filter(p=>p.fecha===lbl).reduce((s,p)=>s+(p.valor||0),0);
+    days30.push({lbl:dd.toLocaleDateString('es-CO',{day:'2-digit',month:'2-digit'}),v});
+  }
+  const c3=document.getElementById('chartIngresos');
+  if(c3) charts.ing=new Chart(c3,{type:'line',data:{labels:days30.map(d=>d.lbl),datasets:[{data:days30.map(d=>d.v),borderColor:'#0066FF',backgroundColor:'rgba(0,102,255,.08)',tension:.4,fill:true,pointRadius:0,pointHoverRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:txt,font:{size:9},maxTicksLimit:10},grid:{color:grid}},y:{ticks:{color:txt,font:{size:9},callback:v=>fmt(v)},grid:{color:grid},beginAtZero:true}}}});
+}
+
+// ══════════════════════════════════════════
+//  MIEMBROS
+// ══════════════════════════════════════════
+function renderMiembrosHTML(){
+  const filtro=`<div style="display:flex;gap:8px;margin-bottom:4px">
+    <input class="f-input" id="buscarM" placeholder="🔍 Buscar miembro..." oninput="filtrarMiembros()" style="flex:1">
+    <select class="f-input" id="filtroEstado" onchange="filtrarMiembros()" style="width:130px">
+      <option value="">Todos</option>
+      <option value="active">Activos</option>
+      <option value="warn">Por vencer</option>
+      <option value="exp">Vencidos</option>
+    </select>
+    ${rol==='admin'?`<button class="btn btn-lime" onclick="openMiembro()">+ Nuevo</button>`:''}
+  </div>`;
+
+  const lista=miembros.map((m,i)=>{
+    const s=statusMiembro(m);
+    const dias=s.dias;
+    const pct=dias>0?Math.min(100,Math.round(dias/DURACIONES[m.plan||'mensual']*100)):0;
+    const progCls=dias>10?'prog-green':dias>3?'prog-yellow':'prog-red';
+    return `<div class="member-row" onclick="verMiembro('${m.id}')" data-nombre="${m.nombre.toLowerCase()}" data-estado="${s.cls}">
+      <div class="member-avatar ${avColor(i)}">${initiales(m.nombre)}</div>
+      <div class="member-info">
+        <div class="member-name">${m.nombre}</div>
+        <div class="member-plan">${(m.plan||'').toUpperCase()} · ${m.tel||''}</div>
+        <div class="progress-wrap" style="margin-top:5px"><div class="progress-fill ${progCls}" style="width:${pct}%"></div></div>
+      </div>
+      <div class="member-status">
+        <span class="badge ${s.cls}">${s.label}</span>
+        ${rol==='admin'?`<div style="display:flex;gap:4px;margin-top:4px">
+          <button class="btn-xs btn-xs-lime" onclick="event.stopPropagation();renovarRapido('${m.id}')">↻</button>
+          <button class="btn-xs btn-xs-outline" onclick="event.stopPropagation();editarMiembro('${m.id}')">✏</button>
+        </div>`:''}
+      </div>
+    </div>`;
+  }).join('') || '<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">No hay miembros registrados</div>';
+
+  return `${filtro}<div id="listaMiembros">${lista}</div>`;
+}
+
+function filtrarMiembros(){
+  const q=(document.getElementById('buscarM').value||'').toLowerCase();
+  const est=document.getElementById('filtroEstado').value;
+  document.querySelectorAll('.member-row').forEach(row=>{
+    const nombre=row.getAttribute('data-nombre')||'';
+    const estado=row.getAttribute('data-estado')||'';
+    const matchQ=!q||nombre.includes(q);
+    const matchE=!est||estado.includes(est);
+    row.style.display=(matchQ&&matchE)?'':'none';
+  });
+}
+
+let editandoMiembroId=null;
+function openMiembro(){
+  editandoMiembroId=null;
+  document.getElementById('modalMiembroTitle').textContent='Nuevo Miembro';
+  ['mNombre','mTel','mDoc','mObs'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mPlan').value='mensual';
+  document.getElementById('mFechaInicio').value=hoy();
+  document.getElementById('mValor').value='';
+  document.getElementById('modalMiembro').classList.add('open');
+}
+function editarMiembro(id){
+  const m=miembros.find(m=>m.id===id);if(!m) return;
+  editandoMiembroId=id;
+  document.getElementById('modalMiembroTitle').textContent='Editar Miembro';
+  document.getElementById('mNombre').value=m.nombre||'';
+  document.getElementById('mTel').value=m.tel||'';
+  document.getElementById('mDoc').value=m.doc||'';
+  document.getElementById('mPlan').value=m.plan||'mensual';
+  document.getElementById('mFechaInicio').value=m.fechaInicio||hoy();
+  document.getElementById('mValor').value='';
+  document.getElementById('mObs').value=m.obs||'';
+  document.getElementById('modalMiembro').classList.add('open');
+}
+function closeMiembro(){ document.getElementById('modalMiembro').classList.remove('open'); }
+
+function guardarMiembro(){
+  const nombre=document.getElementById('mNombre').value.trim();
+  if(!nombre){toast('❌ Ingresa el nombre');return;}
+  const plan=document.getElementById('mPlan').value;
+  const fi=document.getElementById('mFechaInicio').value||hoy();
+  const dias=DURACIONES[plan]||30;
+  const ffDate=new Date(fi+'T12:00:00');ffDate.setDate(ffDate.getDate()+dias);
+  const ff=ffDate.toISOString().slice(0,10);
+  const valor=parseInt(document.getElementById('mValor').value)||0;
+
+  if(editandoMiembroId){
+    const idx=miembros.findIndex(m=>m.id===editandoMiembroId);
+    if(idx>=0){
+      miembros[idx]={...miembros[idx],nombre,tel:document.getElementById('mTel').value,doc:document.getElementById('mDoc').value,plan,fechaInicio:fi,fechaFin:ff,obs:document.getElementById('mObs').value,activo:true};
+    }
+  } else {
+    const id='m'+Date.now();
+    miembros.push({id,nombre,tel:document.getElementById('mTel').value,doc:document.getElementById('mDoc').value,plan,fechaInicio:fi,fechaFin:ff,obs:document.getElementById('mObs').value,activo:true,creadoEl:new Date().toISOString()});
+    if(valor>0) pagos.push({id:'p'+Date.now(),miembroId:id,nombre,plan,valor,fecha:hoy(),tipo:'nueva'});
+  }
+  save();closeMiembro();renderTab('miembros');toast('✅ Miembro guardado');
+}
+
+function renovarRapido(id){
+  const m=miembros.find(m=>m.id===id);if(!m) return;
+  const dias=DURACIONES[m.plan||'mensual']||30;
+  const base=new Date()>new Date(m.fechaFin+'T23:59:59')?hoy():m.fechaFin;
+  const ffDate=new Date(base+'T12:00:00');ffDate.setDate(ffDate.getDate()+dias);
+  m.fechaFin=ffDate.toISOString().slice(0,10);
+  m.activo=true;
+  const planes=getPreciosPlanes();
+  const valor=planes[m.plan]||0;
+  pagos.push({id:'p'+Date.now(),miembroId:m.id,nombre:m.nombre,plan:m.plan,valor,fecha:hoy(),tipo:'renovacion'});
+  save();renderTabs();toast(`✅ ${m.nombre} renovado hasta ${fmtF(m.fechaFin)}`);
+}
+
+function verMiembro(id){
+  const m=miembros.find(m=>m.id===id);if(!m) return;
+  const s=statusMiembro(m);
+  const r=rutinas.find(r=>r.miembroId===id);
+  const asistM=asistencia.filter(a=>a.miembroId===id).slice(-10).reverse();
+  alert(`👤 ${m.nombre}\n📋 Plan: ${m.plan||'—'}\n📅 Vence: ${m.fechaFin?fmtF(m.fechaFin):'—'}\n${s.label}\n📞 ${m.tel||'—'}\n🏋️ Rutina: ${r?r.nombre:'Sin rutina'}\n✅ Última asistencia: ${asistM[0]?asistM[0].fecha:'Nunca'}`);
+}
+
+function getPreciosPlanes(){
+  try{
+    const raw=cfg.planes||'';
+    if(!raw) return PLANES_DEFAULT;
+    const obj={};raw.split(',').forEach(p=>{const[k,v]=p.split(':');if(k&&v)obj[k.trim()]=parseInt(v)||0;});
+    return {...PLANES_DEFAULT,...obj};
+  }catch(e){return PLANES_DEFAULT;}
+}
+
+// ══════════════════════════════════════════
+//  ASISTENCIA
+// ══════════════════════════════════════════
+function renderAsistenciaHTML(){
+  const hoyStr=hoy();
+  const registradosHoy=new Set(asistencia.filter(a=>a.fecha===hoyStr).map(a=>a.miembroId));
+  const activos=miembros.filter(m=>m.activo&&statusMiembro(m).cls!=='badge-frozen');
+
+  const grid=activos.map((m,i)=>{
+    const checked=registradosHoy.has(m.id);
+    const hora=asistencia.find(a=>a.miembroId===m.id&&a.fecha===hoyStr)?.hora||'';
+    return `<div class="checkin-btn ${checked?'checked':''}" onclick="toggleAsistencia('${m.id}','${m.nombre}')">
+      <div class="checkin-icon">${checked?'✅':'⬜'}</div>
+      <div class="checkin-name">${m.nombre}</div>
+      <div class="checkin-time">${checked?hora:'—'}</div>
+    </div>`;
+  }).join('');
+
+  const historial=asistencia.filter(a=>a.fecha===hoyStr).map(a=>{
+    const m=miembros.find(m=>m.id===a.miembroId);
+    return `<div class="alert alert-ok">✅ <b>${m?.nombre||a.nombre}</b> — ${a.hora}</div>`;
+  }).reverse().join('') || '<div style="color:var(--muted);font-size:12px;padding:10px 0">Nadie registrado hoy aún</div>';
+
+  return `
+  <div class="card">
+    <div class="card-title">📅 Check-in de hoy — ${new Date().toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long'})} <span>${registradosHoy.size} registrados</span></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px">${grid||'<div style="color:var(--muted);font-size:12px">No hay miembros activos</div>'}</div>
+  </div>
+  <div class="card">
+    <div class="card-title">📋 Registro de hoy</div>
+    <div style="display:flex;flex-direction:column;gap:6px">${historial}</div>
+  </div>`;
+}
+
+function toggleAsistencia(miembroId,nombre){
+  const hoyStr=hoy();
+  const idx=asistencia.findIndex(a=>a.miembroId===miembroId&&a.fecha===hoyStr);
+  if(idx>=0){
+    asistencia.splice(idx,1);
+    toast(`↩ ${nombre} removido del registro`);
+  } else {
+    const hora=new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+    asistencia.push({id:'a'+Date.now(),miembroId,nombre,fecha:hoyStr,hora});
+    toast(`✅ ${nombre} — ${hora}`);
+  }
+  save();renderTab('asistencia');
+}
+
+// ══════════════════════════════════════════
+//  RUTINAS
+// ══════════════════════════════════════════
+function renderRutinasHTML(){
+  const lista=rutinas.map(r=>{
+    const m=miembros.find(m=>m.id===r.miembroId);
+    return `<div class="card" style="gap:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-family:'Oswald',sans-serif;font-size:15px;font-weight:700;letter-spacing:.5px">${r.nombre}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">👤 ${m?.nombre||'Miembro no encontrado'}</div>
+        </div>
+        <div style="display:flex;gap:5px">
+          ${rol==='admin'?`<button class="btn-xs btn-xs-outline" onclick="editarRutina('${r.id}')">✏</button>
+          <button class="btn-xs btn-xs-red" onclick="eliminarRutina('${r.id}')">🗑</button>`:''}
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        ${r.textoCompleto
+          ? `<div style="font-size:12px;line-height:1.7;color:var(--text)">${formatAIResponse ? formatAIResponse(r.textoCompleto) : r.textoCompleto.replace(/\n/g,'<br>')}</div>`
+          : (r.ejercicios||[]).slice(0,4).map((e,i)=>`
+          <div class="ejercicio-row">
+            <div class="ej-num">${i+1}</div>
+            <div class="ej-info">
+              <div class="ej-name">${e.nombre}</div>
+              <div class="ej-detail">${e.series||'—'} series · ${e.reps||'—'} reps · ${e.peso||'—'} kg</div>
+            </div>
+          </div>`).join('')}
+        ${!r.textoCompleto && r.ejercicios?.length>4?`<div style="font-size:11px;color:var(--muted);text-align:center">+${r.ejercicios.length-4} más</div>`:''}
+      </div>
+    </div>`;
+  }).join('') || '<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">No hay rutinas asignadas aún</div>';
+
+  return `
+  <div style="display:flex;justify-content:flex-end;margin-bottom:4px">
+    <button class="btn btn-lime" onclick="openRutina()">+ Nueva rutina</button>
+  </div>
+  ${lista}`;
+}
+
+let editandoRutinaId=null;
+let ejerciciosTmp=[];
+
+function openRutina(){
+  editandoRutinaId=null;ejerciciosTmp=[];
+  document.getElementById('modalRutinaTitle').textContent='Nueva Rutina';
+  document.getElementById('rNombre').value='';
+  const sel=document.getElementById('rMiembro');
+  sel.innerHTML=miembros.map(m=>`<option value="${m.id}">${m.nombre}</option>`).join('');
+  renderEjerciciosTmp();
+  document.getElementById('modalRutina').classList.add('open');
+}
+function editarRutina(id){
+  const r=rutinas.find(r=>r.id===id);if(!r) return;
+  editandoRutinaId=id;
+  ejerciciosTmp=[...r.ejercicios||[]];
+  document.getElementById('modalRutinaTitle').textContent='Editar Rutina';
+  document.getElementById('rNombre').value=r.nombre;
+  const sel=document.getElementById('rMiembro');
+  sel.innerHTML=miembros.map(m=>`<option value="${m.id}" ${m.id===r.miembroId?'selected':''}>${m.nombre}</option>`).join('');
+  renderEjerciciosTmp();
+  document.getElementById('modalRutina').classList.add('open');
+}
+function closeRutina(){ document.getElementById('modalRutina').classList.remove('open'); }
+
+function renderEjerciciosTmp(){
+  document.getElementById('ejerciciosList').innerHTML=ejerciciosTmp.map((e,i)=>`
+    <div class="ejercicio-row">
+      <div class="ej-num">${i+1}</div>
+      <div class="ej-info" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:4px">
+        <input class="f-input" value="${e.nombre}" onchange="ejerciciosTmp[${i}].nombre=this.value" placeholder="Ejercicio" style="font-size:11px;padding:5px 8px">
+        <input class="f-input" value="${e.series}" onchange="ejerciciosTmp[${i}].series=this.value" placeholder="Series" style="font-size:11px;padding:5px 8px;text-align:center">
+        <input class="f-input" value="${e.reps}" onchange="ejerciciosTmp[${i}].reps=this.value" placeholder="Reps" style="font-size:11px;padding:5px 8px;text-align:center">
+        <input class="f-input" value="${e.peso}" onchange="ejerciciosTmp[${i}].peso=this.value" placeholder="Kg" style="font-size:11px;padding:5px 8px;text-align:center">
+      </div>
+      <button class="btn-xs btn-xs-red" onclick="quitarEj(${i})">✕</button>
+    </div>`).join('');
+}
+function addEjercicio(){ ejerciciosTmp.push({nombre:'',series:'3',reps:'12',peso:'—'});renderEjerciciosTmp(); }
+function quitarEj(i){ ejerciciosTmp.splice(i,1);renderEjerciciosTmp(); }
+
+function guardarRutina(){
+  const nombre=document.getElementById('rNombre').value.trim();
+  const miembroId=document.getElementById('rMiembro').value;
+  if(!nombre){toast('❌ Ingresa el nombre de la rutina');return;}
+  if(editandoRutinaId){
+    const idx=rutinas.findIndex(r=>r.id===editandoRutinaId);
+    if(idx>=0) rutinas[idx]={...rutinas[idx],nombre,miembroId,ejercicios:[...ejerciciosTmp]};
+  } else {
+    rutinas.push({id:'r'+Date.now(),nombre,miembroId,ejercicios:[...ejerciciosTmp],creadoEl:new Date().toISOString()});
+  }
+  save();closeRutina();renderTab('rutinas');toast('✅ Rutina guardada');
+}
+function eliminarRutina(id){ if(!confirm('¿Eliminar rutina?')) return;rutinas=rutinas.filter(r=>r.id!==id);save();renderTab('rutinas');}
+
+// ══════════════════════════════════════════
+//  PAGOS
+// ══════════════════════════════════════════
+function renderPagosHTML(){
+  const hoyStr=hoy();
+  const mesStr=hoyStr.slice(0,7);
+  const totHoy=pagos.filter(p=>p.fecha===hoyStr).reduce((s,p)=>s+(p.valor||0),0);
+  const totMes=pagos.filter(p=>p.fecha&&p.fecha.startsWith(mesStr)).reduce((s,p)=>s+(p.valor||0),0);
+
+  const tabla=pagos.slice().reverse().slice(0,30).map(p=>`
+    <tr>
+      <td style="font-family:var(--mono);font-size:10px;color:var(--muted)">${p.fecha}</td>
+      <td style="font-size:12px;font-weight:500">${p.nombre||'—'}</td>
+      <td><span class="badge ${p.tipo==='renovacion'?'badge-warn':'badge-active'}">${p.plan||'—'}</span></td>
+      <td style="font-family:var(--mono);color:#5599FF;font-weight:700">${fmt(p.valor)}</td>
+    </tr>`).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px">Sin pagos registrados</td></tr>';
+
+  return `
+  <div class="stats-grid">
+    <div class="stat-card blue"><div class="stat-icon">📅</div><div class="stat-label">Ingresos hoy</div><div class="stat-val" style="font-size:18px">${fmt(totHoy)}</div></div>
+    <div class="stat-card green"><div class="stat-icon">📆</div><div class="stat-label">Ingresos del mes</div><div class="stat-val" style="font-size:18px">${fmt(totMes)}</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">💰 Historial de pagos</div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr>
+        <th style="text-align:left;padding:7px 8px;border-bottom:1px solid var(--border);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Fecha</th>
+        <th style="text-align:left;padding:7px 8px;border-bottom:1px solid var(--border);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Miembro</th>
+        <th style="text-align:left;padding:7px 8px;border-bottom:1px solid var(--border);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Plan</th>
+        <th style="text-align:left;padding:7px 8px;border-bottom:1px solid var(--border);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Valor</th>
+      </tr></thead>
+      <tbody>${tabla}</tbody>
+    </table>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+//  VISTAS CLIENTE
+// ══════════════════════════════════════════
+function getMiembro(){
+  if(!clienteActivo) return miembros[0];
+  return miembros.find(m=>m.id===clienteActivo)||miembros[0];
+}
+
+function renderMiClienteHTML(){
+  const m=getMiembro();
+  if(!m) return '<div class="alert alert-info">No hay miembros registrados en este gym</div>';
+  const s=statusMiembro(m);
+  const dias=s.dias;
+  const pct=dias>0?Math.min(100,Math.round(dias/DURACIONES[m.plan||'mensual']*100)):0;
+  const progCls=dias>10?'prog-green':dias>3?'prog-yellow':'prog-red';
+  return `
+  <div class="client-card-big">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="member-avatar ${avColor(0)}" style="width:52px;height:52px;font-size:22px">${initiales(m.nombre)}</div>
+      <div><div style="font-size:18px;font-weight:700">${m.nombre}</div><div style="font-size:12px;color:var(--muted);font-family:'Oswald',sans-serif;letter-spacing:.5px;text-transform:uppercase">${m.plan||'Sin plan'}</div></div>
+    </div>
+    <div style="display:flex;align-items:flex-end;gap:8px">
+      <div class="client-dias-num">${dias>0?dias:0}</div>
+      <div class="client-dias-lbl">días restantes</div>
+    </div>
+    <div class="progress-wrap" style="height:8px"><div class="progress-fill ${progCls}" style="width:${pct}%"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)">
+      <span>Inicio: ${m.fechaInicio?fmtF(m.fechaInicio):'—'}</span>
+      <span>Vence: ${m.fechaFin?fmtF(m.fechaFin):'—'}</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">📊 Mi estado</div>
+    <div class="alert ${dias>5?'alert-ok':dias>0?'alert-warn':'alert-red'}">${dias>5?'✅ Membresía activa':dias>0?'⏰ Tu membresía está por vencer':'❌ Membresía vencida'}</div>
+    <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="stat-card blue"><div class="stat-label">Plan</div><div class="stat-val" style="font-size:16px">${(m.plan||'—').toUpperCase()}</div></div>
+      <div class="stat-card blue"><div class="stat-label">Tel</div><div class="stat-val" style="font-size:14px">${m.tel||'—'}</div></div>
+    </div>
+    ${m.obs?`<div class="alert alert-info" style="margin-top:8px">📝 ${m.obs}</div>`:''}
+  </div>`;
+}
+
+function renderMiRutinaHTML(){
+  const m=getMiembro();
+  if(!m) return '<div class="alert alert-info">No hay miembro seleccionado</div>';
+  const r=rutinas.find(r=>r.miembroId===m.id);
+  if(!r) return `<div class="card"><div class="card-title">🏋️ Mi Rutina</div><div class="alert alert-info">No tienes rutina asignada aún. Consulta con tu entrenador.</div></div>`;
+
+  // Si la rutina viene de IA con texto completo, mostrar con botones por línea
+  if(r.textoCompleto){
+    const lineas = r.textoCompleto.split('\n');
+    let html = '';
+    lineas.forEach(l=>{
+      // Línea de ejercicio con bullet
+      const m = l.match(/[•\-\*]\s*([A-Za-záéíóúÁÉÍÓÚñÑ][^:•\n]{3,40})(?::|—|-)/i);
+      if(m){
+        const nombreEj = m[1].trim();
+        html += `<div class="ejercicio-row" style="justify-content:space-between">
+          <div style="display:flex;align-items:flex-start;gap:8px;flex:1">
+            <span style="color:var(--accent);font-size:14px;flex-shrink:0">•</span>
+            <span style="font-size:13px;line-height:1.5">${l.replace(/^[•\-\*]\s*/,'')}</span>
+          </div>
+
+        </div>`;
+      } else if(l.trim()){
+        html += `<div style="font-size:${l.startsWith('**')?'13px':'12px'};font-weight:${l.startsWith('**')?'700':'400'};color:${l.startsWith('**')?'var(--accent)':'var(--text)'};padding:${l.startsWith('**')?'8px 0 2px':'2px 0'};line-height:1.5">${l.replace(/\*\*/g,'')}</div>`;
+      }
+    });
+    return `<div class="card"><div class="card-title">🏋️ ${r.nombre} <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">IA ✨</span></div><div style="display:flex;flex-direction:column;gap:4px">${html}</div></div>`;
+  }
+
+  // Rutina manual — mostrar ejercicios con botón ver
+  return `<div class="card">
+    <div class="card-title">🏋️ ${r.nombre}</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      ${(r.ejercicios||[]).map((e,i)=>`
+        <div class="ejercicio-row">
+          <div class="ej-num">${i+1}</div>
+          <div class="ej-info">
+            <div class="ej-name">${e.nombre}</div>
+            <div class="ej-detail">${e.series} series · ${e.reps} reps${e.peso&&e.peso!=='—'?' · '+e.peso+' kg':''}</div>
+          </div>
+
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderMiAsistenciaHTML(){
+  const m=getMiembro();
+  if(!m) return '';
+  const hist=asistencia.filter(a=>a.miembroId===m.id).slice().reverse().slice(0,20);
+  const total=asistencia.filter(a=>a.miembroId===m.id).length;
+  return `
+  <div class="stats-grid">
+    <div class="stat-card blue"><div class="stat-icon">✅</div><div class="stat-label">Total asistencias</div><div class="stat-val">${total}</div></div>
+    <div class="stat-card blue"><div class="stat-icon">📅</div><div class="stat-label">Este mes</div><div class="stat-val">${asistencia.filter(a=>a.miembroId===m.id&&a.fecha?.startsWith(hoy().slice(0,7))).length}</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📋 Historial</div>
+    <div style="display:flex;flex-direction:column;gap:5px">
+      ${hist.length?hist.map(a=>`<div class="alert alert-ok">✅ ${fmtF(a.fecha)} — ${a.hora}</div>`).join('')
+      :'<div style="color:var(--muted);font-size:12px;padding:10px">Sin registros de asistencia</div>'}
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════
+// ══ LOGO DEL GYM ══
+function handleGymLogo(e){
+  const file=e.target.files[0];if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(ev){ cfg.logoGym=ev.target.result; mostrarLogoGym(cfg.logoGym); };
+  reader.readAsDataURL(file);
+}
+function mostrarLogoGym(src){
+  const img=document.getElementById('logoPreviewImg');
+  const ph=document.getElementById('logoPlaceholder');
+  const btn=document.getElementById('btnQuitarLogoGym');
+  if(img&&ph&&btn){ img.src=src;img.style.display='block';ph.style.display='none';btn.style.display='block'; }
+  actualizarHeaderLogo();
+}
+function quitarLogoGym(){
+  delete cfg.logoGym;
+  const img=document.getElementById('logoPreviewImg');
+  const ph=document.getElementById('logoPlaceholder');
+  const btn=document.getElementById('btnQuitarLogoGym');
+  if(img&&ph&&btn){ img.style.display='none';ph.style.display='block';btn.style.display='none'; }
+  actualizarHeaderLogo();
+}
+function actualizarHeaderLogo(){
+  const wrap=document.getElementById('gymLogoWrap');
+  const nomEl=document.getElementById('gymNombreHeader');
+  const subEl=document.getElementById('gymSubHeader');
+  if(!wrap) return;
+  if(cfg.logoGym){
+    wrap.innerHTML=`<img src="${cfg.logoGym}" style="width:32px;height:32px;border-radius:6px;object-fit:cover">`;
+  } else {
+    wrap.innerHTML='<div class="logo-icon">💪</div>';
+  }
+  if(nomEl&&cfg.gym){ const parts=cfg.gym.split(' '); nomEl.textContent=parts[0]; if(subEl) subEl.textContent=parts.slice(1).join(' ')||'Gym'; }
+}
+
+function openCfg(){
+  document.getElementById('cfgGym').value=cfg.gym||'';
+  if(document.getElementById('cfgEslogan')) document.getElementById('cfgEslogan').value=cfg.eslogan||'';
+  document.getElementById('cfgRol').value=cfg.rol||'admin';
+  document.getElementById('cfgPlanes').value=cfg.planes||'';
+  document.getElementById('cfgOpenAI').value=cfg.openaiKey||'';
+  document.getElementById('cfgGroq').value=cfg.groqKey||'';
+  if(cfg.logoGym) mostrarLogoGym(cfg.logoGym);
+  initColorPicker();
+  const sel=document.getElementById('cfgClienteSel');
+  sel.innerHTML=miembros.map(m=>`<option value="${m.id}" ${m.id===clienteActivo?'selected':''}>${m.nombre}</option>`).join('');
+  toggleClienteWrap();
+  document.getElementById('cfgRol').addEventListener('change',toggleClienteWrap);
+  document.getElementById('modalCfg').classList.add('open');
+}
+function toggleClienteWrap(){
+  const r=document.getElementById('cfgRol').value;
+  document.getElementById('cfgClienteWrap').style.display=r==='client'?'flex':'none';
+}
+function closeCfg(){ document.getElementById('modalCfg').classList.remove('open'); }
+function guardarCfg(){
+  const colorEl=document.getElementById('cfgColorCustom');
+  if(colorEl&&colorEl.value){
+    cfg.accentColor=colorEl.value;
+    aplicarColor(colorEl.value);
+  }
+  cfg.gym=document.getElementById('cfgGym').value;
+  if(document.getElementById('cfgEslogan')) cfg.eslogan=document.getElementById('cfgEslogan').value;
+  cfg.rol=document.getElementById('cfgRol').value;
+  cfg.planes=document.getElementById('cfgPlanes').value;
+  cfg.openaiKey=document.getElementById('cfgOpenAI').value.trim();
+  cfg.groqKey=document.getElementById('cfgGroq').value.trim();
+  if(cfg.rol==='client') cfg.clienteActivo=document.getElementById('cfgClienteSel').value;
+  rol=cfg.rol;clienteActivo=cfg.clienteActivo||null;
+  save();actualizarHeaderLogo();closeCfg();renderTabs();toast('✅ Configuración guardada');
+}
+
+// ══════════════════════════════════════════
+//  BACKUP
+// ══════════════════════════════════════════
+function exportarDatos(){
+  const data={v:'1.0',exp:new Date().toISOString(),gym:cfg.gym,miembros,rutinas,asistencia,pagos};
+  const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(b);
+  a.download=`siryx-gym-backup-${hoy()}.json`;
+  a.click();toast('✅ Backup exportado');
+}
+function importarDatos(e){
+  const f=e.target.files[0];if(!f) return;
+  const r=new FileReader();
+  r.onload=function(ev){
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(!confirm(`¿Importar datos de "${d.gym||'backup'}"?\nEsto reemplaza todos los datos actuales.`)) return;
+      miembros=d.miembros||[];rutinas=d.rutinas||[];asistencia=d.asistencia||[];pagos=d.pagos||[];
+      save();closeCfg();renderTabs();toast(`✅ Datos importados`);
+    }catch(err){toast('❌ Archivo inválido');}
+  };
+  r.readAsText(f);e.target.value='';
+}
+
+// ══════════════════════════════════════════
+//  MOTOR DE IA
+// ══════════════════════════════════════════
+let aiProvider = 'groq'; // 'openai' | 'groq'
+let chatHistory = [];
+
+async function callAI(messages, maxTokens=1200){
+  // Prioridad: OpenAI si el usuario la configuró, si no usa Groq integrado
+  const GROQ_KEY = (window.SIRYX_CONFIG && window.SIRYX_CONFIG.groqKey) || cfg.groqKey || '';
+  const useOpenAI = (aiProvider==='openai') && cfg.openaiKey;
+  if(useOpenAI){
+    const res = await fetch('https://api.openai.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${cfg.openaiKey}`},
+      body:JSON.stringify({model:'gpt-4o-mini',max_tokens:maxTokens,temperature:.7,messages})
+    });
+    const d=await res.json();
+    if(d.error) throw new Error(d.error.message);
+    return d.choices?.[0]?.message?.content||'';
+  } else {
+    const key = cfg.groqKey || GROQ_KEY;
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+      body:JSON.stringify({model:'llama-3.1-8b-instant',max_tokens:maxTokens,temperature:.7,messages})
+    });
+    const d=await res.json();
+    if(d.error) throw new Error(d.error.message);
+    return d.choices?.[0]?.message?.content||'';
+  }
+}
+
+function noKeyMsg(){
+  return `<div class="alert alert-warn">⚙ Configura tu API Key en el botón <b>⚙</b> → sección IA.<br>Puedes usar <b>Groq gratis</b> (console.groq.com) o <b>OpenAI</b> si tienes créditos.</div>`;
+}
+
+function formatAIResponse(text){
+  return text
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/^#{1,3}\s+(.+)$/gm,'<strong style="color:var(--accent);display:block;margin-top:8px">$1</strong>')
+    .replace(/^[-•]\s+(.+)$/gm,'<span style="display:block;padding-left:12px">• $1</span>')
+    .replace(/\n/g,'<br>');
+}
+
+// ══ TAB IA (Admin/Entrenador) ══
+function renderIAHTML(){
+  const hasKey = cfg.openaiKey||cfg.groqKey;
+  const providerSelector = `
+    <div class="ai-provider">
+      <button class="provider-btn ${aiProvider==='groq'?'active':''}" onclick="setProvider('groq')">🆓 Groq (Gratis)</button>
+      <button class="provider-btn ${aiProvider==='openai'?'active':''}" onclick="setProvider('openai')">💳 OpenAI</button>
+    </div>`;
+
+  const miembrosOpts = miembros.map(m=>`<option value="${m.id}">${m.nombre}</option>`).join('');
+
+  return `
+  ${!hasKey?noKeyMsg():''}
+
+  ${providerSelector}
+
+  <!-- 1. GENERADOR DE RUTINAS -->
+  <div class="ai-panel">
+    <div><div class="ai-badge">✨ IA</div></div>
+    <div class="ai-title">🏋️ Generador de Rutinas</div>
+    <div class="ai-desc">Selecciona las opciones o escribe tu propia descripción y la IA arma la rutina completa.</div>
+
+    <div class="f-field"><label>Miembro (opcional)</label>
+      <select class="f-input" id="aiRutinaM" style="width:100%">
+        <option value="">— Sin asignar —</option>${miembrosOpts}
+      </select>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="f-field"><label>Objetivo</label>
+        <select class="f-input" id="aiRutinaObjetivo" style="width:100%">
+          <option value="pérdida de peso">Pérdida de peso</option>
+          <option value="ganancia muscular">Ganancia muscular</option>
+          <option value="tonificación">Tonificación</option>
+          <option value="resistencia y cardio">Resistencia y cardio</option>
+          <option value="fuerza">Fuerza</option>
+          <option value="flexibilidad">Flexibilidad</option>
+        </select>
+      </div>
+      <div class="f-field"><label>Nivel</label>
+        <select class="f-input" id="aiRutinaNivel" style="width:100%">
+          <option value="principiante">Principiante</option>
+          <option value="intermedio">Intermedio</option>
+          <option value="avanzado">Avanzado</option>
+        </select>
+      </div>
+      <div class="f-field"><label>Días por semana</label>
+        <select class="f-input" id="aiRutinaDias" style="width:100%">
+          <option value="2">2 días</option>
+          <option value="3" selected>3 días</option>
+          <option value="4">4 días</option>
+          <option value="5">5 días</option>
+          <option value="6">6 días</option>
+        </select>
+      </div>
+      <div class="f-field"><label>Equipamiento</label>
+        <select class="f-input" id="aiRutinaEquipo" style="width:100%">
+          <option value="gym completo">Gym completo</option>
+          <option value="mancuernas y barra">Mancuernas y barra</option>
+          <option value="solo peso corporal">Solo peso corporal</option>
+          <option value="máquinas">Máquinas</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="f-field">
+      <label>Detalles adicionales (opcional)</label>
+      <textarea class="ai-textarea" id="aiRutinaPrompt" placeholder="Ej: Sin sentadillas por lesión en rodilla, enfocarse en parte superior..." style="min-height:70px"></textarea>
+    </div>
+
+    <button class="btn btn-lime" id="btnGenRutina" onclick="generarRutinaIA()" style="width:100%">⚡ Generar Rutina</button>
+    <div class="ai-result" id="aiRutinaResult"></div>
+  </div>
+
+  <!-- 2. PLAN NUTRICIONAL -->
+  <div class="ai-panel">
+    <div><div class="ai-badge">✨ IA</div></div>
+    <div class="ai-title">🥗 Plan Nutricional</div>
+    <div class="ai-desc">Genera un plan de alimentación personalizado. Se guardará en el perfil del miembro.</div>
+    <div class="f-field"><label>Asignar a miembro</label>
+      <select class="f-input" id="aiNutMiembro" style="width:100%">
+        <option value="">— Sin asignar —</option>${miembrosOpts}
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="f-field"><label>Peso (kg)</label><input class="f-input" id="aiNutPeso" placeholder="75" type="number" style="width:100%"></div>
+      <div class="f-field"><label>Altura (cm)</label><input class="f-input" id="aiNutAltura" placeholder="175" type="number" style="width:100%"></div>
+      <div class="f-field"><label>Objetivo</label>
+        <select class="f-input" id="aiNutObjetivo" style="width:100%">
+          <option value="perder peso">Perder peso</option>
+          <option value="ganar músculo">Ganar músculo</option>
+          <option value="mantener peso">Mantener peso</option>
+          <option value="mejorar rendimiento">Mejorar rendimiento</option>
+        </select>
+      </div>
+      <div class="f-field"><label>Nivel de actividad</label>
+        <select class="f-input" id="aiNutActividad" style="width:100%">
+          <option value="sedentario">Sedentario</option>
+          <option value="ligero">Ligero (1-3 días/sem)</option>
+          <option value="moderado">Moderado (3-5 días/sem)</option>
+          <option value="intenso">Intenso (6-7 días/sem)</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-lime" id="btnGenNutri" onclick="generarNutriIA()" style="width:100%">⚡ Generar Plan</button>
+    <div class="ai-result" id="aiNutriResult"></div>
+  </div>
+
+  <!-- 3. ANÁLISIS DE NEGOCIO -->
+  <div class="ai-panel">
+    <div><div class="ai-badge">✨ IA</div></div>
+    <div class="ai-title">📊 Análisis de Negocio</div>
+    <div class="ai-desc">La IA analiza los datos del gym y entrega insights accionables.</div>
+    <button class="btn btn-lime" id="btnAnalisis" onclick="analizarNegocio()" style="width:100%">⚡ Analizar ahora</button>
+    <div class="ai-result" id="aiAnalisisResult"></div>
+  </div>`;
+}
+
+function setProvider(p){
+  aiProvider=p;
+  document.querySelectorAll('.provider-btn').forEach(b=>{
+    b.classList.toggle('active', b.textContent.toLowerCase().includes(p));
+  });
+}
+
+// GENERAR RUTINA
+let rutinaIAGenerada = null;
+async function generarRutinaIA(){
+  const objetivo  = document.getElementById('aiRutinaObjetivo')?.value||'pérdida de peso';
+  const nivel     = document.getElementById('aiRutinaNivel')?.value||'principiante';
+  const dias      = document.getElementById('aiRutinaDias')?.value||'3';
+  const equipo    = document.getElementById('aiRutinaEquipo')?.value||'gym completo';
+  const extra     = document.getElementById('aiRutinaPrompt')?.value.trim()||'';
+  const btn=document.getElementById('btnGenRutina');
+  setBtnLoading(btn, true, '⚡ Generar Rutina');
+  const resultEl = document.getElementById('aiRutinaResult');
+  resultEl.classList.remove('show');
+  try{
+    const descripcion = `Objetivo: ${objetivo} | Nivel: ${nivel} | ${dias} días/semana | Equipamiento: ${equipo}${extra?' | Notas: '+extra:''}`;
+    const resp = await callAI([
+      {role:'system',content:'Eres un entrenador personal experto. Responde siempre en español. Sé muy específico con series, reps y descansos. Usa este formato exacto:\n• NombreEjercicio: X series x Y reps (descanso: Z seg)'},
+      {role:'user',content:`Crea una rutina de entrenamiento completa con estas características: ${descripcion}.
+
+Formato obligatorio:
+**Nombre de la rutina**
+
+**Día 1 — [Grupo muscular]**
+• Ejercicio 1: 3 series x 12 reps (descanso: 60 seg)
+• Ejercicio 2: 4 series x 10 reps (descanso: 90 seg)
+
+(repetir para cada día)
+
+**Consejos finales**
+Nota de progresión y recomendaciones.`}
+    ], 2000);
+    rutinaIAGenerada = resp;
+    resultEl.innerHTML = formatAIResponse(resp) + `
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+        <button class="btn btn-lime" onclick="guardarRutinaDesdeIA(this)" style="width:100%">💾 Guardar esta rutina</button>
+      </div>`;
+    resultEl.classList.add('show');
+    resultEl.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }catch(e){
+    handleAIError(e,'aiRutinaResult');
+  }
+  setBtnLoading(btn, false, '⚡ Generar Rutina');
+}
+
+function guardarRutinaDesdeIA(btnEl){
+  if(!rutinaIAGenerada) return;
+  const miembroId = document.getElementById('aiRutinaM').value;
+  const lineas = rutinaIAGenerada.split('\n').map(l=>l.trim()).filter(l=>l);
+  const nombre = lineas[0].replace(/\*+/g,'').trim() || 'Rutina IA';
+  const ejercicios = [];
+  rutinaIAGenerada.split('\n').forEach(l=>{
+    let m = l.match(/[•\-\*]\s*([^:]+):\s*(\d+)\s*series?\s*[x×xX]\s*(\d+)/i);
+    if(m){ ejercicios.push({nombre:m[1].trim(),series:m[2],reps:m[3],peso:'—'}); return; }
+    m = l.match(/[•\-\*]\s*([^—]+)[—\-]\s*(\d+)\s*series?\s*[x×xX]\s*(\d+)/i);
+    if(m){ ejercicios.push({nombre:m[1].trim(),series:m[2],reps:m[3],peso:'—'}); return; }
+    m = l.match(/[•\-\*]\s*(.{5,40})\s+(\d+)[x×]\s*(\d+)/i);
+    if(m) ejercicios.push({nombre:m[1].trim(),series:m[2],reps:m[3],peso:'—'});
+  });
+  if(ejercicios.length===0){
+    rutinaIAGenerada.split('\n').forEach(l=>{
+      if(l.trim().match(/^[•\-\*]/)){
+        const txt=l.replace(/^[•\-\*]\s*/,'').split(':')[0].trim();
+        if(txt.length>3) ejercicios.push({nombre:txt,series:'3',reps:'12',peso:'—'});
+      }
+    });
+  }
+  rutinas.push({id:'r'+Date.now(),nombre,miembroId:miembroId||null,ejercicios,textoCompleto:rutinaIAGenerada,creadoEl:new Date().toISOString(),fuente:'IA'});
+  save();
+  toast(`✅ Rutina "${nombre}" guardada con ${ejercicios.length} ejercicio(s)`);
+  // Cambiar botón a estado guardado
+  if(btnEl){ btnEl.textContent='✅ Guardada'; btnEl.disabled=true; btnEl.style.opacity='.6'; }
+  rutinaIAGenerada = null;
+}
+
+// GENERAR NUTRICIÓN
+async function generarNutriIA(){
+  const peso = document.getElementById('aiNutPeso').value||70;
+  const altura = document.getElementById('aiNutAltura').value||170;
+  const objetivo = document.getElementById('aiNutObjetivo').value;
+  const actividad = document.getElementById('aiNutActividad').value;
+  const btn=document.getElementById('btnGenNutri');
+  setBtnLoading(btn,true,'⚡ Generar Plan');
+  document.getElementById('aiNutriResult').classList.remove('show');
+  try{
+    const miembroNutriId = document.getElementById('aiNutMiembro')?.value||'';
+    const resp = await callAI([
+      {role:'system',content:'Eres un nutricionista deportivo experto. Responde siempre en español, de forma clara y práctica.'},
+      {role:'user',content:`Genera un plan nutricional para:
+- Peso: ${peso}kg, Altura: ${altura}cm
+- Objetivo: ${objetivo}
+- Nivel de actividad: ${actividad}
+
+Incluye:
+1. Calorías diarias recomendadas
+2. Macronutrientes (proteínas, carbohidratos, grasas en gramos)
+3. Plan de comidas para un día típico (desayuno, merienda, almuerzo, merienda, cena)
+4. Alimentos recomendados y a evitar
+5. Suplementos opcionales`}
+    ], 1500);
+    // Parsear macros básicos del texto
+    const cals = resp.match(/(\d{4})\s*(?:kcal|calorías|cal)/i);
+    const prots = resp.match(/(\d+)\s*g?\s*(?:de\s*)?proteína/i);
+    const carbos = resp.match(/(\d+)\s*g?\s*(?:de\s*)?carbohidrato/i);
+    const grasas = resp.match(/(\d+)\s*g?\s*(?:de\s*)?grasa/i);
+
+    // Guardar en perfil del miembro si hay uno seleccionado
+    const midNutri = document.getElementById('aiNutMiembro')?.value;
+    if(midNutri){
+      const planObj={
+        texto:resp,
+        objetivo:document.getElementById('aiNutObjetivo').value,
+        macros:{
+          calorias:cals?cals[1]:'—',
+          proteinas:prots?prots[1]:'—',
+          carbos:carbos?carbos[1]:'—',
+          grasas:grasas?grasas[1]:'—'
+        },
+        desayuno: extraerSeccion(resp,'desayuno'),
+        almuerzo: extraerSeccion(resp,'almuerzo'),
+        cena: extraerSeccion(resp,'cena'),
+        consejos: extraerSeccion(resp,'consejo|suplemento|recomendación'),
+        fecha: hoy()
+      };
+      localStorage.setItem('sg_nutri_'+midNutri, JSON.stringify(planObj));
+      toast('✅ Plan guardado en el perfil del miembro');
+    }
+
+    const result = document.getElementById('aiNutriResult');
+    result.innerHTML = formatAIResponse(resp) + (midNutri?'<div class="alert alert-ok" style="margin-top:10px">✅ Plan guardado en el perfil del miembro</div>':'');
+    result.classList.add('show');
+  }catch(e){
+    handleAIError(e,'aiNutriResult');
+  }
+  setBtnLoading(btn,false,'⚡ Generar Plan');
+}
+
+// ANÁLISIS DE NEGOCIO
+async function analizarNegocio(){
+  const btn=document.getElementById('btnAnalisis');
+  setBtnLoading(btn,true,'⚡ Analizar');
+  document.getElementById('aiAnalisisResult').classList.remove('show');
+  try{
+    const hoyStr=hoy();
+    const mesStr=hoyStr.slice(0,7);
+    const activos=miembros.filter(m=>statusMiembro(m).cls==='badge-active').length;
+    const vencidos=miembros.filter(m=>statusMiembro(m).cls==='badge-exp').length;
+    const porVencer=miembros.filter(m=>statusMiembro(m).cls==='badge-warn').length;
+    const ingresosMes=pagos.filter(p=>p.fecha?.startsWith(mesStr)).reduce((s,p)=>s+(p.valor||0),0);
+    const asistSemana=asistencia.filter(a=>{const d=new Date(a.fecha);const h=new Date();return (h-d)<7*86400000;}).length;
+    const planes={};miembros.forEach(m=>{planes[m.plan]=(planes[m.plan]||0)+1;});
+    const planTop=Object.entries(planes).sort((a,b)=>b[1]-a[1])[0]?.[0]||'N/A';
+
+    const resp = await callAI([
+      {role:'system',content:'Eres un consultor de negocios para gimnasios. Analiza los datos y da recomendaciones concretas y accionables en español.'},
+      {role:'user',content:`Analiza estos datos de mi gimnasio "${cfg.gym||'Gym'}":
+
+📊 MEMBRESÍAS:
+- Total miembros: ${miembros.length}
+- Activos: ${activos} | Por vencer: ${porVencer} | Vencidos: ${vencidos}
+- Plan más popular: ${planTop}
+- Tasa de retención: ${miembros.length>0?Math.round(activos/miembros.length*100):0}%
+
+💰 FINANZAS:
+- Ingresos del mes: $${ingresosMes.toLocaleString('es-CO')} COP
+- Total pagos registrados: ${pagos.length}
+
+✅ ASISTENCIA:
+- Visitas esta semana: ${asistSemana}
+- Total registros: ${asistencia.length}
+
+Dame:
+1. Diagnóstico del estado actual del negocio
+2. Los 3 problemas principales que detectas
+3. Las 3 acciones concretas más importantes para mejorar
+4. Una proyección optimista si implementan las mejoras`}
+    ], 1500);
+    const result = document.getElementById('aiAnalisisResult');
+    result.innerHTML = formatAIResponse(resp);
+    result.classList.add('show');
+  }catch(e){
+    handleAIError(e,'aiAnalisisResult');
+  }
+  setBtnLoading(btn,false,'⚡ Analizar ahora');
+}
+
+// ══ CHAT CLIENTE ══
+function renderChatHTML(){
+  const m=getMiembro();
+  const nombre=m?m.nombre:'Cliente';
+  const plan=m?m.plan:'';
+  const dias=m?diasRestantes(m):0;
+  return `
+  <div class="ai-panel" style="flex:1;min-height:0">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div class="ai-badge">🤖 IA</div>
+        <div class="ai-title">Entrenador Personal IA</div>
+        <div class="ai-desc">Pregúntame sobre ejercicios, nutrición, técnica o cualquier duda del gym.</div>
+      </div>
+      <button class="btn-xs btn-xs-outline" onclick="limpiarChat()">🗑 Limpiar</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-msg">
+        <div class="chat-avatar chat-bot-av">🤖</div>
+        <div class="chat-bubble bot">¡Hola <strong>${nombre}</strong>! 💪 Soy tu entrenador IA. Puedo ayudarte con ejercicios, técnica, nutrición y más. ¿Qué necesitas hoy?</div>
+      </div>
+    </div>
+    <div class="chat-typing" id="chatTyping">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+    <div class="chat-input-row">
+      <input class="chat-input" id="chatInput" placeholder="Escribe tu pregunta..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarChat()}">
+      <button class="btn btn-lime" onclick="enviarChat()" style="padding:9px 16px;white-space:nowrap">Enviar</button>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+    <button class="btn btn-outline" style="font-size:11px;justify-content:center" onclick="chatQuick('¿Cómo hago sentadillas correctamente?')">🏋️ Técnica sentadilla</button>
+    <button class="btn btn-outline" style="font-size:11px;justify-content:center" onclick="chatQuick('Dame consejos de nutrición para ${plan||'mejorar mi físico'}')">🥗 Consejos nutrición</button>
+    <button class="btn btn-outline" style="font-size:11px;justify-content:center" onclick="chatQuick('Tengo ${dias} días de membresía. ¿Qué debería hacer para aprovecharlos al máximo?')">💡 Aprovechar membresía</button>
+    <button class="btn btn-outline" style="font-size:11px;justify-content:center" onclick="chatQuick('¿Qué ejercicio me recomiendas para calentar antes de entrenar?')">🔥 Calentamiento</button>
+  </div>`;
+}
+
+async function enviarChat(){
+  const input=document.getElementById('chatInput');
+  const msg=input.value.trim();
+  if(!msg) return;
+  input.value='';
+  agregarMsgChat('user',msg);
+  chatHistory.push({role:'user',content:msg});
+  await responderChat();
+}
+function chatQuick(msg){ document.getElementById('chatInput').value=msg; enviarChat(); }
+function limpiarChat(){ chatHistory=[];renderTab('chat'); }
+
+async function responderChat(){
+  const typing=document.getElementById('chatTyping');
+  typing.classList.add('show');
+  const m=getMiembro();
+  const contexto=m?`El cliente se llama ${m.nombre}, tiene plan ${m.plan||'básico'} y le quedan ${diasRestantes(m)} días de membresía.`:'';
+  try{
+    const messages=[
+      {role:'system',content:`Eres un entrenador personal y nutricionista experto en un gimnasio llamado "${cfg.gym||'SiryX Gym'}". 
+      Responde siempre en español, de forma amigable, motivadora y concisa (máximo 3-4 párrafos).
+      ${contexto}
+      Si preguntan sobre ejercicios, incluye consejos de técnica. Si preguntan sobre nutrición, sé práctico.
+      Usa emojis ocasionalmente para ser más amigable.`},
+      ...chatHistory.slice(-8)
+    ];
+    const resp = await callAI(messages, 800);
+    chatHistory.push({role:'assistant',content:resp});
+    agregarMsgChat('bot',resp);
+  }catch(e){
+    if(e.message==='NO_KEY') agregarMsgChat('bot','⚙️ El administrador necesita configurar la API Key de IA para activar el chat.');
+    else agregarMsgChat('bot','Disculpa, tuve un problema al responder. Intenta de nuevo.');
+  }
+  typing.classList.remove('show');
+}
+
+function agregarMsgChat(tipo, texto){
+  const msgs=document.getElementById('chatMessages');
+  if(!msgs) return;
+  const div=document.createElement('div');
+  div.className=`chat-msg ${tipo}`;
+  div.innerHTML=`
+    <div class="chat-avatar ${tipo==='bot'?'chat-bot-av':'chat-user-av'}">${tipo==='bot'?'🤖':'👤'}</div>
+    <div class="chat-bubble ${tipo}">${tipo==='bot'?formatAIResponse(texto):texto}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+// HELPERS
+function setBtnLoading(btn,loading,originalText){
+  if(loading){
+    btn.innerHTML=`<span class="btn-spin"></span> Generando...`;
+    btn.classList.add('btn-loading');btn.disabled=true;
+  } else {
+    btn.innerHTML=originalText;
+    btn.classList.remove('btn-loading');btn.disabled=false;
+  }
+}
+function handleAIError(e,resultId){
+  const el=document.getElementById(resultId);
+  if(!el) return;
+  if(e.message==='NO_KEY'){el.innerHTML=noKeyMsg();} 
+  else if(e.message?.includes('401')){el.innerHTML='<div class="alert alert-red">❌ API Key inválida. Verifica en ⚙ Configuración.</div>';}
+  else {el.innerHTML=`<div class="alert alert-red">❌ Error: ${e.message}</div>`;}
+  el.classList.add('show');
+}
+
+// ══════════════════════════════════════════
+//  MODAL EJERCICIO CON GIF
+// ══════════════════════════════════════════
+
+
+// ══════════════════════════════════════════
+//  PROGRESO DEL CLIENTE
+// ══════════════════════════════════════════
+function renderMiProgresoHTML(){
+  const m=getMiembro(); if(!m) return '';
+  const key='sg_progreso_'+m.id;
+  const registros=JSON.parse(localStorage.getItem(key)||'[]');
+  const hoyStr=hoy();
+
+  // Formulario entrada
+  const form=`<div class="card">
+    <div class="card-title">📏 Registrar medidas de hoy</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px">
+      <div class="f-field"><label>Peso (kg)</label><input class="f-input" id="ppeso" type="number" step="0.1" placeholder="75.5"></div>
+      <div class="f-field"><label>Cintura (cm)</label><input class="f-input" id="pcintura" type="number" placeholder="85"></div>
+      <div class="f-field"><label>Cadera (cm)</label><input class="f-input" id="pcadera" type="number" placeholder="95"></div>
+      <div class="f-field"><label>Pecho (cm)</label><input class="f-input" id="ppecho" type="number" placeholder="100"></div>
+    </div>
+    <div class="f-field"><label>Nota (opcional)</label><input class="f-input" id="pnota" placeholder="Cómo me sentí hoy..."></div>
+    <button class="btn btn-lime" onclick="guardarProgreso('${m.id}')" style="width:100%">💾 Guardar medidas</button>
+  </div>`;
+
+  // Historial
+  const hist=registros.slice().reverse().slice(0,10);
+  const histHTML=hist.length ? hist.map((r,i)=>{
+    const prev=hist[i+1];
+    const diff=prev?((r.peso-prev.peso)>0?'+':'')+(r.peso-prev.peso).toFixed(1)+'kg':'';
+    const cls=diff?diff.startsWith('+')?'up':'down':'eq';
+    return `<div class="prog-entry">
+      <div>
+        <div class="prog-fecha">${fmtF(r.fecha)}</div>
+        ${r.nota?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${r.nota}</div>`:''}
+      </div>
+      <div style="text-align:right">
+        <div class="prog-val">${r.peso||'—'} kg</div>
+        ${diff?`<div class="prog-diff ${cls}" style="font-size:11px;font-family:var(--mono)">${diff}</div>`:''}
+      </div>
+    </div>`;
+  }).join('') : '<div style="color:var(--muted);font-size:12px;padding:10px">Sin registros aún</div>';
+
+  // Gráfico peso
+  const chartHTML=registros.length>=2?`
+    <div class="card">
+      <div class="card-title">📈 Evolución del peso</div>
+      <div style="position:relative;height:180px"><canvas id="chartPeso"></canvas></div>
+    </div>`:'';
+
+  setTimeout(()=>{
+    if(registros.length>=2){
+      const dark=document.documentElement.getAttribute('data-theme')==='dark';
+      const txt=dark?'#5a5a78':'#8888a8';
+      const grid=dark?'rgba(255,255,255,.05)':'rgba(0,0,0,.05)';
+      const cv=document.getElementById('chartPeso');
+      if(cv) new Chart(cv,{type:'line',data:{
+        labels:registros.slice(-12).map(r=>r.fecha.slice(5)),
+        datasets:[{data:registros.slice(-12).map(r=>r.peso),borderColor:'#0066FF',backgroundColor:'rgba(0,102,255,.08)',tension:.4,fill:true,pointRadius:4,pointBackgroundColor:'#0066FF'}]
+      },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:txt,font:{size:9}},grid:{color:grid}},y:{ticks:{color:txt,font:{size:9}},grid:{color:grid},beginAtZero:false}}}});
+    }
+  },100);
+
+  return form+chartHTML+`<div class="card"><div class="card-title">📋 Historial de medidas</div><div style="display:flex;flex-direction:column;gap:6px">${histHTML}</div></div>`;
+}
+
+function guardarProgreso(miembroId){
+  const peso=parseFloat(document.getElementById('ppeso').value)||0;
+  const cintura=parseFloat(document.getElementById('pcintura').value)||0;
+  const cadera=parseFloat(document.getElementById('pcadera').value)||0;
+  const pecho=parseFloat(document.getElementById('ppecho').value)||0;
+  const nota=document.getElementById('pnota').value.trim();
+  if(!peso){toast('❌ Ingresa al menos el peso');return;}
+  const key='sg_progreso_'+miembroId;
+  const registros=JSON.parse(localStorage.getItem(key)||'[]');
+  registros.push({fecha:hoy(),peso,cintura,cadera,pecho,nota});
+  localStorage.setItem(key,JSON.stringify(registros));
+  // Verificar logros de progreso
+  verificarLogros(miembroId);
+  renderTab('miprogreso');
+  toast('✅ Medidas guardadas');
+}
+
+// ══════════════════════════════════════════
+//  NUTRICIÓN
+// ══════════════════════════════════════════
+function renderMiNutricionHTML(){
+  const m=getMiembro(); if(!m) return '';
+  const key='sg_nutri_'+m.id;
+  const plan=JSON.parse(localStorage.getItem(key)||'null');
+
+  if(!plan) return `<div class="card">
+    <div class="card-title">🍽 Mi Plan Nutricional</div>
+    <div class="alert alert-info">Tu entrenador aún no ha generado tu plan nutricional. Solicítalo en el gym.</div>
+  </div>`;
+
+  const comidas=[
+    {icon:'🌅',nombre:'Desayuno',key:'desayuno'},
+    {icon:'🍎',nombre:'Merienda AM',key:'meriendam'},
+    {icon:'☀️',nombre:'Almuerzo',key:'almuerzo'},
+    {icon:'🍊',nombre:'Merienda PM',key:'meriendam2'},
+    {icon:'🌙',nombre:'Cena',key:'cena'},
+  ];
+
+  const macrosHTML=plan.macros?`
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px">
+      <span class="macro-pill mp-cal">🔥 ${plan.macros.calorias||'—'} kcal</span>
+      <span class="macro-pill mp-prot">💪 ${plan.macros.proteinas||'—'}g prot</span>
+      <span class="macro-pill mp-carb">⚡ ${plan.macros.carbos||'—'}g carbs</span>
+      <span class="macro-pill mp-fat">💧 ${plan.macros.grasas||'—'}g grasas</span>
+    </div>`:'';
+
+  const comidasHTML=comidas.map(cm=>`
+    <div class="nutri-meal">
+      <div class="nutri-meal-header" onclick="this.nextElementSibling.classList.toggle('open')">
+        <span class="nutri-meal-icon">${cm.icon}</span>
+        <span class="nutri-meal-name">${cm.nombre}</span>
+        <span style="margin-left:auto;color:var(--muted);font-size:12px">▼</span>
+      </div>
+      <div class="nutri-meal-body">${plan[cm.key]||'Sin especificar aún'}</div>
+    </div>`).join('');
+
+  return `<div class="card">
+    <div class="card-title">🍽 Mi Plan Nutricional <span style="font-size:10px">IA ✨</span></div>
+    ${macrosHTML}
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Objetivo: ${plan.objetivo||'—'} · Generado: ${plan.fecha?fmtF(plan.fecha):'—'}</div>
+    ${comidasHTML}
+    ${plan.consejos?`<div class="alert alert-info" style="margin-top:8px">💡 ${plan.consejos}</div>`:''}
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+//  LOGROS Y RETOS
+// ══════════════════════════════════════════
+const LOGROS_DEF=[
+  {id:'primera_visita',   icon:'🌟', nombre:'Primera visita',     desc:'Completaste tu primer check-in',         req:1,  tipo:'asistencia'},
+  {id:'semana_completa',  icon:'🔥', nombre:'Semana de fuego',     desc:'7 días consecutivos asistiendo',         req:7,  tipo:'racha'},
+  {id:'mes_activo',       icon:'💪', nombre:'Mes activo',          desc:'20+ visitas en un mes',                  req:20, tipo:'mes'},
+  {id:'50_visitas',       icon:'🏅', nombre:'50 visitas',          desc:'Alcanzaste 50 asistencias totales',      req:50, tipo:'total_asist'},
+  {id:'100_visitas',      icon:'🥇', nombre:'Centurión',           desc:'100 visitas al gym — ¡leyenda!',         req:100,tipo:'total_asist'},
+  {id:'primer_peso',      icon:'📊', nombre:'Primer registro',     desc:'Registraste tus primeras medidas',       req:1,  tipo:'progreso'},
+  {id:'baja_peso',        icon:'⚖️', nombre:'En forma',            desc:'Bajaste de peso respecto al inicio',    req:1,  tipo:'baja_peso'},
+  {id:'rutina_asignada',  icon:'📋', nombre:'Plan en mano',        desc:'Tienes una rutina asignada',             req:1,  tipo:'rutina'},
+  {id:'nutri_activa',     icon:'🥗', nombre:'Nutrición activa',    desc:'Tienes plan nutricional activo',         req:1,  tipo:'nutri'},
+  {id:'3_meses',          icon:'🦁', nombre:'Constancia de León',  desc:'3 meses siendo miembro del gym',         req:90, tipo:'dias_miembro'},
+];
+
+function calcularLogros(miembroId){
+  const m=miembros.find(m=>m.id===miembroId); if(!m) return [];
+  const asistM=asistencia.filter(a=>a.miembroId===miembroId);
+  const progKey='sg_progreso_'+miembroId;
+  const prog=JSON.parse(localStorage.getItem(progKey)||'[]');
+  const nutri=JSON.parse(localStorage.getItem('sg_nutri_'+miembroId)||'null');
+  const rutina=rutinas.find(r=>r.miembroId===miembroId);
+  const diasMiembro=m.fechaInicio?Math.floor((new Date()-new Date(m.fechaInicio))/(86400000)):0;
+
+  // Racha: días consecutivos
+  let racha=0,fechaSet=new Set(asistM.map(a=>a.fecha));
+  for(let d=0;d<365;d++){
+    const dd=new Date();dd.setDate(dd.getDate()-d);
+    if(fechaSet.has(dd.toISOString().slice(0,10))) racha++;
+    else break;
+  }
+  // Visitas este mes
+  const mesStr=hoy().slice(0,7);
+  const visitasMes=asistM.filter(a=>a.fecha?.startsWith(mesStr)).length;
+  // Bajó de peso
+  const bajoPeso=prog.length>=2&&prog[prog.length-1].peso<prog[0].peso;
+
+  const earned=[];
+  LOGROS_DEF.forEach(l=>{
+    let ok=false;
+    if(l.tipo==='asistencia') ok=asistM.length>=l.req;
+    else if(l.tipo==='racha') ok=racha>=l.req;
+    else if(l.tipo==='mes') ok=visitasMes>=l.req;
+    else if(l.tipo==='total_asist') ok=asistM.length>=l.req;
+    else if(l.tipo==='progreso') ok=prog.length>=l.req;
+    else if(l.tipo==='baja_peso') ok=bajoPeso;
+    else if(l.tipo==='rutina') ok=!!rutina;
+    else if(l.tipo==='nutri') ok=!!nutri;
+    else if(l.tipo==='dias_miembro') ok=diasMiembro>=l.req;
+    earned.push({...l, earned:ok});
+  });
+  return earned;
+}
+
+function verificarLogros(miembroId){
+  // Llamar después de eventos importantes para actualizar logros
+  const logros=calcularLogros(miembroId);
+  const key='sg_logros_'+miembroId;
+  const prev=JSON.parse(localStorage.getItem(key)||'[]');
+  const prevIds=new Set(prev);
+  const nuevos=logros.filter(l=>l.earned&&!prevIds.has(l.id));
+  if(nuevos.length){
+    localStorage.setItem(key,JSON.stringify(logros.filter(l=>l.earned).map(l=>l.id)));
+    nuevos.forEach(l=>toast(`🏆 ¡Nuevo logro! ${l.icon} ${l.nombre}`));
+  }
+}
+
+function renderMiLogrosHTML(){
+  const m=getMiembro(); if(!m) return '';
+  const logros=calcularLogros(m.id);
+  const earned=logros.filter(l=>l.earned).length;
+
+  const grid=logros.map(l=>`
+    <div class="logro-card ${l.earned?'earned':'locked'}">
+      ${l.earned?'<span class="logro-badge new">✓</span>':''}
+      <div class="logro-icon">${l.icon}</div>
+      <div class="logro-nombre">${l.nombre}</div>
+      <div class="logro-desc">${l.desc}</div>
+    </div>`).join('');
+
+  return `
+  <div class="card" style="background:linear-gradient(135deg,var(--s1),var(--s2))">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="font-size:36px">🏆</div>
+      <div>
+        <div style="font-family:'Oswald',sans-serif;font-size:22px;letter-spacing:1px">${earned} / ${logros.length} LOGROS</div>
+        <div style="font-size:12px;color:var(--muted)">Sigue entrenando para desbloquear más</div>
+      </div>
+    </div>
+    <div style="background:var(--s2);border-radius:4px;height:8px;overflow:hidden">
+      <div style="width:${Math.round(earned/logros.length*100)}%;height:100%;background:var(--accent);border-radius:0;transition:width .5s"></div>
+    </div>
+  </div>
+  <div class="logros-grid">${grid}</div>`;
+}
+
+// ══════════════════════════════════════════
+//  RESERVA DE CLASES
+// ══════════════════════════════════════════
+function renderMiClasesHTML(){
+  const m=getMiembro(); if(!m) return '';
+  const clases=JSON.parse(localStorage.getItem('sg_clases')||'[]');
+  const reservas=JSON.parse(localStorage.getItem('sg_reservas_'+m.id)||'[]');
+
+  if(!clases.length) return `<div class="card">
+    <div class="card-title">📅 Clases Grupales</div>
+    <div class="alert alert-info">El administrador aún no ha programado clases. Consulta en recepción.</div>
+  </div>`;
+
+  const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const hoyDia=new Date().getDay();
+
+  const clasesHTML=clases.map(cl=>{
+    const reservado=reservas.includes(cl.id);
+    const lleno=cl.capacidad>0&&(cl.inscritos||0)>=cl.capacidad;
+    return `<div class="clase-card ${reservado?'reservado':''}">
+      <div class="clase-hora">${cl.hora}</div>
+      <div class="clase-info">
+        <div class="clase-nombre">${cl.nombre}</div>
+        <div class="clase-detalle">${cl.instructor||'Instructor'} · ${cl.duracion||60}min · ${dias[cl.dia]||'—'}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+        <span class="clase-spots">${cl.capacidad>0?`${cl.inscritos||0}/${cl.capacidad}`:'Libre'}</span>
+        ${!lleno||reservado?`<button class="btn-xs ${reservado?'btn-xs-outline':'btn-xs-lime'}" onclick="toggleReserva('${m.id}','${cl.id}')">
+          ${reservado?'✓ Reservado':'+ Reservar'}
+        </button>`:'<span style="font-size:10px;color:var(--red)">Lleno</span>'}
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div class="card">
+    <div class="card-title">📅 Clases Grupales</div>
+    <div style="display:flex;flex-direction:column;gap:8px">${clasesHTML}</div>
+  </div>`;
+}
+
+function toggleReserva(miembroId,claseId){
+  const key='sg_reservas_'+miembroId;
+  const reservas=JSON.parse(localStorage.getItem(key)||'[]');
+  const clases=JSON.parse(localStorage.getItem('sg_clases')||'[]');
+  const idx=reservas.indexOf(claseId);
+  const cl=clases.find(c=>c.id===claseId);
+  if(idx>=0){
+    reservas.splice(idx,1);
+    if(cl&&cl.inscritos>0) cl.inscritos--;
+    toast('↩ Reserva cancelada');
+  } else {
+    reservas.push(claseId);
+    if(cl) cl.inscritos=(cl.inscritos||0)+1;
+    toast(`✅ Reservado: ${cl?.nombre||'clase'}`);
+  }
+  localStorage.setItem(key,JSON.stringify(reservas));
+  localStorage.setItem('sg_clases',JSON.stringify(clases));
+  renderTab('misclases');
+}
+
+// Vista admin de clases
+function renderClasesAdminHTML(){
+  const clases=JSON.parse(localStorage.getItem('sg_clases')||'[]');
+  const dias=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  return `<div style="display:flex;justify-content:flex-end;margin-bottom:4px">
+    <button class="btn btn-lime" onclick="openModalClase()">+ Nueva clase</button>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    ${clases.map((cl,i)=>`<div class="clase-card">
+      <div class="clase-hora">${cl.hora}</div>
+      <div class="clase-info">
+        <div class="clase-nombre">${cl.nombre}</div>
+        <div class="clase-detalle">${dias[cl.dia]||'—'} · ${cl.instructor||'—'} · ${cl.duracion||60}min</div>
+      </div>
+      <div style="display:flex;gap:5px">
+        <span class="clase-spots">${cl.inscritos||0}/${cl.capacidad>0?cl.capacidad:'∞'}</span>
+        <button class="btn-xs btn-xs-red" onclick="eliminarClase(${i})">🗑</button>
+      </div>
+    </div>`).join('') || '<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">Sin clases programadas</div>'}
+  </div>`;
+}
+
+function openModalClase(){
+  const nombre=prompt('Nombre de la clase (ej: Spinning, Yoga, Funcional):');
+  if(!nombre) return;
+  const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const diaStr=prompt('Día (0=Dom, 1=Lun, 2=Mar, 3=Mié, 4=Jue, 5=Vie, 6=Sáb):','1');
+  const hora=prompt('Hora (ej: 06:00 AM):','07:00 AM');
+  const instructor=prompt('Instructor:','');
+  const duracion=prompt('Duración en minutos:','60');
+  const capacidad=prompt('Capacidad máxima (0 = sin límite):','20');
+  const clases=JSON.parse(localStorage.getItem('sg_clases')||'[]');
+  clases.push({id:'cl'+Date.now(),nombre,dia:parseInt(diaStr)||1,hora,instructor,duracion:parseInt(duracion)||60,capacidad:parseInt(capacidad)||0,inscritos:0});
+  localStorage.setItem('sg_clases',JSON.stringify(clases));
+  renderTab('misclases');
+  toast('✅ Clase agregada');
+}
+
+function eliminarClase(idx){
+  if(!confirm('¿Eliminar esta clase?')) return;
+  const clases=JSON.parse(localStorage.getItem('sg_clases')||'[]');
+  clases.splice(idx,1);
+  localStorage.setItem('sg_clases',JSON.stringify(clases));
+  renderTab('misclases');
+}
+
+// ══════════════════════════════════════════
+//  MENSAJES ENTRENADOR → CLIENTE
+// ══════════════════════════════════════════
+function renderMensajesHTML(){
+  const mensajes=JSON.parse(localStorage.getItem('sg_mensajes')||'[]');
+  const esAdmin=rol==='admin'||rol==='trainer';
+  const miembro=getMiembro();
+
+  const lista=mensajes.slice().reverse().slice(0,20).map(msg=>`
+    <div class="msg-card">
+      <div class="msg-header">
+        <span class="msg-from">👤 ${msg.para||'Todos'} · 💬 ${msg.de||'Entrenador'}</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          ${msg.nuevo?'<span class="msg-nuevo">NUEVO</span>':''}
+          <span class="msg-time">${msg.fecha||''}</span>
+        </div>
+      </div>
+      <div class="msg-text">${msg.texto}</div>
+    </div>`).join('') || '<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">Sin mensajes aún</div>';
+
+  if(esAdmin){
+    const miembrosOpts=`<option value="Todos">📢 Todos los miembros</option>`+miembros.map(m=>`<option value="${m.nombre}">${m.nombre}</option>`).join('');
+    return `
+    <div class="card">
+      <div class="card-title">💬 Nuevo mensaje</div>
+      <div class="f-field"><label>Para</label><select class="f-input" id="msgPara">${miembrosOpts}</select></div>
+      <div class="f-field"><label>Mensaje</label><textarea class="msg-compose" id="msgTexto" placeholder="Escribe una nota de motivación, indicación o recordatorio..."></textarea></div>
+      <button class="btn btn-lime" onclick="enviarMensajeAdmin()" style="width:100%">📤 Enviar mensaje</button>
+    </div>
+    <div class="card"><div class="card-title">📋 Mensajes enviados</div><div style="display:flex;flex-direction:column;gap:8px">${lista}</div></div>`;
+  }
+
+  // Vista cliente — marcar como leídos
+  const msgsCliente=mensajes.filter(m=>m.para==='Todos'||(miembro&&m.para===miembro.nombre));
+  const listaC=msgsCliente.slice().reverse().slice(0,10).map(msg=>`
+    <div class="msg-card">
+      <div class="msg-header">
+        <span class="msg-from">💬 ${msg.de||'Tu entrenador'}</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          ${msg.nuevo?'<span class="msg-nuevo">NUEVO</span>':''}
+          <span class="msg-time">${msg.fecha||''}</span>
+        </div>
+      </div>
+      <div class="msg-text">${msg.texto}</div>
+    </div>`).join('') || '<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">Sin mensajes aún</div>';
+
+  return `<div class="card"><div class="card-title">💬 Mensajes de tu entrenador</div><div style="display:flex;flex-direction:column;gap:8px">${listaC}</div></div>`;
+}
+
+function enviarMensajeAdmin(){
+  const para=document.getElementById('msgPara').value;
+  const texto=document.getElementById('msgTexto').value.trim();
+  if(!texto){toast('❌ Escribe el mensaje');return;}
+  const mensajes=JSON.parse(localStorage.getItem('sg_mensajes')||'[]');
+  mensajes.push({id:'ms'+Date.now(),de:cfg.gym||'Entrenador',para,texto,fecha:new Date().toLocaleString('es-CO',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}),nuevo:true});
+  localStorage.setItem('sg_mensajes',JSON.stringify(mensajes));
+  document.getElementById('msgTexto').value='';
+  renderTab('mensajes');
+  toast(`✅ Mensaje enviado a ${para}`);
+}
+
+// Agregar clases al renderTab del admin también
+
+function extraerSeccion(texto, keyword){
+  const lines=texto.split('\n');
+  let capturando=false;
+  const result=[];
+  for(const l of lines){
+    if(new RegExp(keyword,'i').test(l)){capturando=true;continue;}
+    if(capturando){
+      if(/^\*\*|^#{1,3}\s/.test(l)&&result.length>0) break;
+      if(l.trim()) result.push(l.trim());
+    }
+  }
+  return result.slice(0,6).join('<br>')||'Ver plan completo arriba';
+}
+
+// ══════════════════════════════════════════
+//  SISTEMA DE COLOR DINÁMICO
+// ══════════════════════════════════════════
+function seleccionarColor(hex, presetEl){
+  // Actualizar preview
+  const prev = document.getElementById('cfgColorPreview');
+  const hexEl = document.getElementById('cfgColorHex');
+  const picker = document.getElementById('cfgColorCustom');
+  if(prev) prev.style.background = hex;
+  if(hexEl) hexEl.textContent = hex.toUpperCase();
+  if(picker) picker.value = hex;
+
+  // Marcar preset seleccionado
+  document.querySelectorAll('.color-preset').forEach(p=>p.classList.remove('selected'));
+  if(presetEl) presetEl.classList.add('selected');
+
+  // Preview en vivo — aplicar temporalmente
+  aplicarColor(hex);
+}
+
+function aplicarColor(hex){
+  // Calcular variantes del color
+  const r=parseInt(hex.slice(1,3),16);
+  const g=parseInt(hex.slice(3,5),16);
+  const b=parseInt(hex.slice(5,7),16);
+  const lighter=`rgb(${Math.min(255,r+50)},${Math.min(255,g+50)},${Math.min(255,b+50)})`;
+  const darker=`rgb(${Math.max(0,r-30)},${Math.max(0,g-30)},${Math.max(0,b-30)})`;
+
+  const root = document.documentElement;
+  root.style.setProperty('--accent', hex);
+  root.style.setProperty('--accent2', lighter);
+  root.style.setProperty('--accentd', darker);
+  root.style.setProperty('--blue', hex);
+}
+
+function initColorPicker(){
+  const color = cfg.accentColor || '#0066FF';
+  aplicarColor(color);
+  // Marcar preset activo
+  setTimeout(()=>{
+    document.querySelectorAll('.color-preset').forEach(p=>{
+      if(p.dataset.color===color) p.classList.add('selected');
+    });
+    const picker=document.getElementById('cfgColorCustom');
+    const hexEl=document.getElementById('cfgColorHex');
+    const prev=document.getElementById('cfgColorPreview');
+    if(picker) picker.value=color;
+    if(hexEl) hexEl.textContent=color.toUpperCase();
+    if(prev) prev.style.background=color;
+  },100);
+}
+
+applyTheme();
+// Cargar key de config.js si está disponible
+if(window.SIRYX_CONFIG){
+  if(window.SIRYX_CONFIG.groqKey && !cfg.groqKey){
+    cfg.groqKey = window.SIRYX_CONFIG.groqKey;
+  }
+}
+// Aplicar color guardado inmediatamente antes del splash
+if(cfg.accentColor) aplicarColor(cfg.accentColor);
+
+// Nombre del gym en el splash
+const splashName = document.getElementById('splashGymName');
+if(splashName) splashName.textContent = cfg.gym ? cfg.gym.toUpperCase() : 'SIRYX GYM';
+
+setTimeout(()=>{
+  document.getElementById('splash').classList.add('out');
+  setTimeout(()=>document.getElementById('splash').style.display='none',600);
+  iniciarApp();
+},2200);
 </script>
 </body>
 </html>
